@@ -4,6 +4,12 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <Version>0.0.1</Version>
+        <Title>Hapdy.Monads</Title>
+        <Description>Monad tools for C# coding. Follows the Programming on Rails, and Resulting patterns</Description>
+        <Copyright>2026</Copyright>
+        <PackageTags>C# Monad Result</PackageTags>
+        <PackageReleaseNotes>First release in alpha. Mostly feature complete with need of user testing</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>

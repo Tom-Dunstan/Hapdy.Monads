@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/Files/">
+    <File Path=".gitignore" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
   <Project Path="Hapdy.Monads.Tests/Hapdy.Monads.Tests.csproj" />
   <Project Path="Hapdy.Monads/Hapdy.Monads.csproj" />
 </Solution>
