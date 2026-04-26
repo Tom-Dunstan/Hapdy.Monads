@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Hapdy.Monads.Tests/Hapdy.Monads.Tests.csproj" />
+  <Project Path="Hapdy.Monads/Hapdy.Monads.csproj" />
+</Solution>

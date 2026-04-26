@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Update="Results\Extensions\ResultHelper.Bind.cs">
+        <DependentUpon>ResultHelper.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Results\Extensions\ResultHelper.Catch.cs">
+        <DependentUpon>ResultHelper.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Results\Extensions\ResultHelper.Match.cs">
+        <DependentUpon>ResultHelper.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Results\Extensions\ResultHelper.OnFailure.cs">
+        <DependentUpon>ResultHelper.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Results\Extensions\ResultHelper.Then.cs">
+        <DependentUpon>ResultHelper.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Results\Extensions\ResultHelper.Unbox.cs">
+        <DependentUpon>ResultHelper.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Results\Extensions\ResultHelper.Validate.cs">
+        <DependentUpon>ResultHelper.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+</Project>
