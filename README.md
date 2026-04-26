@@ -95,30 +95,32 @@ var result = IResult.Map<int>(5, x => x * 2);
 Matches the IResult<T> to the appropriate action based on the type of IResult<T>.
 ```csharp
 // Example of matching the IResult<T> to the appropriate action
-IResult<int> result = Success<int>.Create(5);
-result.Match(
-    success => Console.WriteLine(success.Value),
-    failure => Console.WriteLine(failure.ErrorMessage)
-);
+IResult<string> result = IResult<string> Celebrate(int value) 
+    return Success<string>.Create("The value is greater than zero! :)");
+
+IResult<string> result = IResult<string> Morn(Failure<int> failure, int value) 
+    return Success<string>.Create($"Oh no! {Failure.ErrorMessage} :(");
+
+IResult<string> result = IResult.Map(5)
+                                .Validate(x => x > 0 ? Success<int>.Create(x) : Failure<int>.Create("Value must be greater than zero"))
+                                .Match(celebrate,morn);
 ```
 
 ### OnFailure() ###
 Executes the provided action if the IResult<T> is a Failure.
 ```csharp
 // Example of executing the provided action if the IResult<T> is a Failure
-IResult<int> result = Failure<int>.Create(
+IResult<int> fail = Failure<int>.Create(
     message: "An error occurred"
 );
-result.OnFailure(failure => Console.WriteLine(failure.ErrorMessage));
+var result = fail.OnFailure(failure => Console.WriteLine(failure.ErrorMessage));
 ```
 
 ### Catch() ###
 Executes the provided action if the IResult<T> is a Failure.
 ```csharp
 // Example of executing the provided action if the IResult<T> is a Failure
-IResult<int> result = Failure<int>.Create(
-    message: "An error occurred"
-);
+IResult<int> result = ExceptionFailure<int>.Create( new DivideByZeroException() );
 result.Catch(exceptionFailure => Console.WriteLine(exceptionFailure.Exception.ErrorMessage));
 ```
 
@@ -127,9 +129,9 @@ Validates the IResult<T> against a predicate.
 ```csharp
 // Example of validating the IResult<T> against a predicate
 IResult<int> result = Success<int>.Create(5);
-result.Validate(x => x < 0 
-                  ? Failure<int>.Create("Value must be greater than zero")
-                  : Success<int>.Create(x));
+var result.Validate(x => x < 0 
+                      ? Failure<int>.Create("Value must be greater than zero")
+                      : Success<int>.Create(x));
 ```
 
 ### Then() ###
