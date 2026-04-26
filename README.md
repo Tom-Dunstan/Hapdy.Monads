@@ -8,6 +8,10 @@ Result monad is a monad that represents a computation that may fail, and provide
 ### IResult<T> Interface ###
 All monads implement this interface, and is the main expected return type for all monad methods. The included extension methods expect function to return this type.
 
+Has two properties:
+- IsSuccess: A boolean indicating the monad represents a successful operation if true.
+- IsFailure: A boolean indicating the monad represents a failed operation if true.
+
 ### Success<T> ###
 A monad that represents a successful computation of an operation.
 
@@ -88,7 +92,7 @@ var result = IResult.Map<int>(5);
 It can also take a transform function to map the value of the IResult<T>.
 ```csharp
 // Example of creating an IResult<T> from an existing value
-var result = IResult.Map<int>(5, x => x * 2);
+var result = IResult.Map<int>(5, Success<int>.Create(x => x * 2));
 ```
 
 ### Match() ###
