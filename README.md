@@ -148,5 +148,5 @@ Unboxes the value of a ShortCircuit<T> monad and returns a Success<T>.
 ```csharp
 // Example of unboxing the value of a ShortCircuit<T> monad
 ShortCircuit<int> shortCircuit = ShortCircuit<int>.Create(5);
-int value = shortCircuit.Unbox();
+int value = shortCircuit.Unbox().Value;
 ```
