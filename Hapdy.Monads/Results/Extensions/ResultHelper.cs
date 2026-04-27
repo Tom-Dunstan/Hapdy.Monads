@@ -2,6 +2,23 @@
 
 public static partial class ResultHelper
 {
+    private static async Task<IResult<TValue>> RunFunctionWithCatchAsync<T, TValue>(
+        Func<T, CancellationToken, Task<IResult<TValue>>> func
+      , T                                                 value
+      , CancellationToken                                 cancellationToken)
+    {
+        try
+        {
+            return await func(value, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            return new ExceptionFailure<TValue>(e);
+        }
+    }
+
+
+    
     private static async Task<IResult<TValue>> RunFunctionWithCatch<T, TValue>(
         Func<T, CancellationToken, Task<IResult<TValue>>> func
       , T                                                 value
@@ -10,6 +27,24 @@ public static partial class ResultHelper
         try
         {
             return await func(value, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            return new ExceptionFailure<TValue>(e);
+        }
+    }
+
+    private static async Task<IResult<TValue>> RunFunctionWithCatch<T, TParam, TValue>(
+        Func<T, TParam, CancellationToken, Task<IResult<TValue>>> func
+      , T                                                         value
+      , TParam                                                    param
+      , CancellationToken                                         cancellationToken)
+    {
+        try
+        {
+            return await func(value
+                            , param
+                     ,        cancellationToken);
         }
         catch (Exception e)
         {
@@ -101,6 +136,21 @@ public static partial class ResultHelper
         try
         {
             return func(value);
+        }
+        catch (Exception e)
+        {
+            return new ExceptionFailure<TValue>(e);
+        }
+    }
+
+    private static IResult<TValue> RunFunctionWithCatch<T, TParam, TValue>(
+        Func<T, TParam, IResult<TValue>> func
+      , T                                value
+      , TParam                           param)
+    {
+        try
+        {
+            return func(value, param);
         }
         catch (Exception e)
         {

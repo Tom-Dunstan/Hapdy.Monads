@@ -1,4 +1,5 @@
-﻿namespace Hapdy.Monads.Results.Extensions;
+﻿// ReSharper disable MemberCanBePrivate.Global
+namespace Hapdy.Monads.Results.Extensions;
 
 public static partial class ResultHelper
 {
@@ -15,6 +16,23 @@ public static partial class ResultHelper
         {
             var result = await resultTask;
             return await result.Bind(func, cancellationToken);
+        }
+
+        /// <summary>
+        /// Binds a function to a parameter
+        /// </summary>
+        /// <param name="func">Function to bind to result</param>
+        /// <param name="param">Parameter to pass to function</param>
+        /// <param name="cancellationToken">Cancellation token for asynchronous operation</param>
+        /// <typeparam name="TParam">Type of parameter</typeparam>
+        /// <typeparam name="TValue">Type of the result value type</typeparam>
+        /// <returns>A result of type <typeparamref name="TValue" /></returns>
+        public async Task<IResult<TValue>> Bind<TParam, TValue>(Func<T, TParam, CancellationToken, Task<IResult<TValue>>> func, TParam param, CancellationToken cancellationToken)
+        {
+            var result = await resultTask;
+            return await result.Bind(func
+                                   , param
+                                   , cancellationToken);
         }
 
         /// <summary>
@@ -63,6 +81,20 @@ public static partial class ResultHelper
         /// Binds a function to a parameter
         /// </summary>
         /// <param name="func">Function to bind to result</param>
+        /// <param name="param">Parameter to bind to result</param>
+        /// <typeparam name="TValue">Type of the result value type</typeparam>
+        /// <typeparam name="TParam">Type of the parameter to bind to result</typeparam>
+        /// <returns>A result of type <typeparamref name="TValue" /></returns>
+        public async Task<IResult<TValue>> Bind<TParam, TValue>(Func<T, TParam, IResult<TValue>> func, TParam param)
+        {
+            var result = await resultTask;
+            return result.Bind(func, param);
+        }
+
+        /// <summary>
+        /// Binds a function to a parameter
+        /// </summary>
+        /// <param name="func">Function to bind to result</param>
         /// <typeparam name="TValue">Type of the result value type</typeparam>
         /// <returns>A result of type <typeparamref name="TValue" /></returns>
         public async Task<IResult<TValue>> Bind<TValue>(Func<IResult<TValue>> func)
@@ -97,11 +129,11 @@ public static partial class ResultHelper
                      , IExceptionFailure<T> exceptionFailure => ExceptionFailure<TValue>.Create(exceptionFailure.Exception)
                      , IFailure<T> failure                   => Failure<TValue>.Create(failure.ErrorMessage)
 #pragma warning disable CA2208
-                     , _                                     => ExceptionFailure<TValue>.Create(new ArgumentOutOfRangeException(nameof(result)))
+                     , _ => ExceptionFailure<TValue>.Create(new ArgumentOutOfRangeException(nameof(result)))
 #pragma warning restore CA2208
                    };
         }
-        
+
         private async Task<IResult<TValue>> BindResult<TValue>(Func<T, Task<IResult<TValue>>> func)
         {
             return result switch
@@ -111,7 +143,7 @@ public static partial class ResultHelper
                      , IExceptionFailure<T> exceptionFailure => ExceptionFailure<TValue>.Create(exceptionFailure.Exception)
                      , IFailure<T> failure                   => Failure<TValue>.Create(failure.ErrorMessage)
 #pragma warning disable CA2208
-                     , _                                     => ExceptionFailure<TValue>.Create(new ArgumentOutOfRangeException(nameof(result)))
+                     , _ => ExceptionFailure<TValue>.Create(new ArgumentOutOfRangeException(nameof(result)))
 #pragma warning restore CA2208
                    };
         }
@@ -122,6 +154,19 @@ public static partial class ResultHelper
         /// <param name="func">Function to bind to result</param>
         /// <returns>A result of type <typeparamref name="TValue" /></returns>
         public IResult<TValue> Bind<TValue>(Func<T, IResult<TValue>> func) { return result.BindResult(value => RunFunctionWithCatch(func, value)); }
+
+        /// <summary>
+        /// Binds a function to a parameter
+        /// </summary>
+        /// <param name="func">Function to bind to result</param>
+        /// <param name="param">Parameter to pass to function</param>
+        /// <returns>A result of type <typeparamref name="TValue" /></returns>
+        public IResult<TValue> Bind<TParam, TValue>(Func<T, TParam, IResult<TValue>> func, TParam param)
+        {
+            return result.BindResult(value => RunFunctionWithCatch(func
+                                                                 , value
+                                                                 , param));
+        }
 
         /// <summary>
         /// Binds a function to a parameter
@@ -152,11 +197,32 @@ public static partial class ResultHelper
         /// <param name="cancellationToken">Cancellation token for bound async function</param>
         /// <typeparam name="TValue">Type of the result value type</typeparam>
         /// <returns>A result of type <typeparamref name="TValue" /></returns>
-        public async Task<IResult<TValue>> Bind<TValue>(Func<T, CancellationToken, Task<IResult<TValue>>> func
-                                                      , CancellationToken cancellationToken)
+        public async Task<IResult<TValue>> Bind<TValue>(
+            Func<T, CancellationToken, Task<IResult<TValue>>> func
+          , CancellationToken                                 cancellationToken)
         {
             return await result.BindResult(value => RunFunctionWithCatch(func
                                                                        , value
+                                                                       , cancellationToken));
+        }
+
+        /// <summary>
+        /// Binds a function to a parameter
+        /// </summary>
+        /// <param name="func">Function to bind to result</param>
+        /// <param name="param">Parameter to pass to bound function</param>
+        /// <param name="cancellationToken">Cancellation token for bound async function</param>
+        /// <typeparam name="TValue">Type of the result value type</typeparam>
+        /// <typeparam name="TParam">Type of the parameter to pass to bound function</typeparam>
+        /// <returns>A result of type <typeparamref name="TValue" /></returns>
+        public async Task<IResult<TValue>> Bind<TParam, TValue>(
+            Func<T, TParam, CancellationToken, Task<IResult<TValue>>> func
+          , TParam                                                    param
+          , CancellationToken                                         cancellationToken)
+        {
+            return await result.BindResult(value => RunFunctionWithCatch(func
+                                                                       , value
+                                                                       , param
                                                                        , cancellationToken));
         }
 

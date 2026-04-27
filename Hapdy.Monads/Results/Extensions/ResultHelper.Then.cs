@@ -1,4 +1,5 @@
-﻿namespace Hapdy.Monads.Results.Extensions;
+﻿// ReSharper disable MemberCanBePrivate.Global
+namespace Hapdy.Monads.Results.Extensions;
 
 public static partial class ResultHelper
 {
@@ -15,6 +16,23 @@ public static partial class ResultHelper
         {
             var result = await resultTask;
             return await result.Then(func, cancellationToken);
+        }
+
+        /// <summary>
+        /// Next bound function to run
+        /// </summary>
+        /// <param name="func">Function to bind to result</param>
+        /// <param name="param">Parameter to pass to the next function</param>
+        /// <param name="cancellationToken">Cancellation token for asynchronous operation</param>
+        /// <typeparam name="TValue">Type of the result value type</typeparam>
+        /// <typeparam name="TParam">Type of the parameter to pass to the next function</typeparam>
+        /// <returns>A result of type <typeparamref name="TValue" /></returns>
+        public async Task<IResult<TValue>> Then<TParam, TValue>(Func<T, TParam, CancellationToken, Task<IResult<TValue>>> func, TParam param, CancellationToken cancellationToken)
+        {
+            var result = await resultTask;
+            return await result.Then(func
+                                   , param
+                                   , cancellationToken);
         }
 
         /// <summary>
@@ -63,6 +81,20 @@ public static partial class ResultHelper
         /// Next bound function to run
         /// </summary>
         /// <param name="func">Function to bind to result</param>
+        /// <param name="param"></param>
+        /// <typeparam name="TValue">Type of the result value type</typeparam>
+        /// <typeparam name="TParam"></typeparam>
+        /// <returns>A result of type <typeparamref name="TValue" /></returns>
+        public async Task<IResult<TValue>> Then<TParam, TValue>(Func<T, TParam, IResult<TValue>> func, TParam param)
+        {
+            var result = await resultTask;
+            return result.Then(func, param);
+        }
+
+        /// <summary>
+        /// Next bound function to run
+        /// </summary>
+        /// <param name="func">Function to bind to result</param>
         /// <typeparam name="TValue">Type of the result value type</typeparam>
         /// <returns>A result of type <typeparamref name="TValue" /></returns>
         public async Task<IResult<TValue>> Then<TValue>(Func<IResult<TValue>> func)
@@ -99,11 +131,20 @@ public static partial class ResultHelper
         /// Next bound function to run
         /// </summary>
         /// <param name="func">Function to bind to result</param>
+        /// <param name="param">Parameter to pass to the next function</param>
+        /// <returns>A result of type <typeparamref name="TValue" /></returns>
+        public IResult<TValue> Then<TParam, TValue>(Func<T, TParam, IResult<TValue>> func, TParam param) { return result.Bind(func, param); }
+
+        /// <summary>
+        /// Next bound function to run
+        /// </summary>
+        /// <param name="func">Function to bind to result</param>
         /// <typeparam name="TValue">Type of the result value type</typeparam>
         /// <returns>A result of type <typeparamref name="TValue" /></returns>
         public IResult<TValue> Then<TValue>(Func<IResult<TValue>> func) { return result.Bind(func); }
 
         /// <summary>
+        /// Next bound function to run
         /// </summary>
         /// <param name="func">Function to bind to result</param>
         /// <param name="param">Parameter object or value to pass to bound function</param>
@@ -120,6 +161,22 @@ public static partial class ResultHelper
         /// <typeparam name="TValue">Type of the result value type</typeparam>
         /// <returns>A result of type <typeparamref name="TValue" /></returns>
         public async Task<IResult<TValue>> Then<TValue>(Func<T, CancellationToken, Task<IResult<TValue>>> func, CancellationToken cancellationToken) { return await result.Bind(func, cancellationToken); }
+
+        /// <summary>
+        /// Next bound function to run
+        /// </summary>
+        /// <param name="func">Function to bind to result</param>
+        /// <param name="param">Parameter object or value to pass to bound function</param>
+        /// <param name="cancellationToken">Cancellation token for bound async function</param>
+        /// <typeparam name="TValue">Type of the result value type</typeparam>
+        /// <typeparam name="TParam">Type of the parameter to pass to the next function</typeparam>
+        /// <returns>A result of type <typeparamref name="TValue" /></returns>
+        public async Task<IResult<TValue>> Then<TParam, TValue>(Func<T, TParam, CancellationToken, Task<IResult<TValue>>> func, TParam param, CancellationToken cancellationToken)
+        {
+            return await result.Bind(func
+                                   , param
+                                   , cancellationToken);
+        }
 
         /// <summary>
         /// Next bound function to run

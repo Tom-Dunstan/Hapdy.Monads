@@ -1,4 +1,5 @@
-﻿namespace Hapdy.Monads.Results.Extensions;
+﻿// ReSharper disable MemberCanBePrivate.Global
+namespace Hapdy.Monads.Results.Extensions;
 
 public static partial class ResultHelper
 {
