@@ -5,6 +5,7 @@ Monad tools for C# coding. Follows the Programming on Rails, and Resulting patte
 ## Result Monads ##
 Result monad is a monad that represents a computation that may fail, and provides a way to handle errors in a functional way. These tools are based on the Result monad from Haskell, and include extension methods designed to support the Programming on Rails pattern.
 
+- [Examples](#examples)
 - [IResult<T> Interface](#iresult-interface)
   - [Success<T>](#success)
   - [Failure<T>](#failure)
@@ -19,7 +20,6 @@ Result monad is a monad that represents a computation that may fail, and provide
   - [Validate()](#validate)
   - [Then()](#then)
   - [Unbox()](#unbox)
-
 
 ### IResult<T> Interface ###
 All monads implement this interface, and is the main expected return type for all monad methods. The included extension methods expect function to return this type.
@@ -180,3 +180,5 @@ Unboxes the value of a ShortCircuit<T> monad and returns a Success<T>.
 ShortCircuit<int> shortCircuit = ShortCircuit<int>.Create(5);
 int value = shortCircuit.Unbox().Value;
 ```
+
+## Examples ##
