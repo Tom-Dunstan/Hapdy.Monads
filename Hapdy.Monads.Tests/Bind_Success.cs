@@ -576,4 +576,152 @@ public class Bind_Success
         
     }
 
+    [Test]
+    public void When_SuccessParamAndValueFunctionThrowsException_Then_ReturnsExceptionFailure()
+    {
+        // Arrange
+        const string testParam      = "Test";
+        var          startingResult = Success<int>.Create(42);
+        var          exception      = new Exception("Test Exception");
+        
+        // ReSharper disable once MoveLocalFunctionAfterJumpStatement
+        IResult<int> SuccessFunction(int value, string param) => throw exception;
+        
+        //Act
+        var resultAfterBind = startingResult.Bind(SuccessFunction, testParam);
+        
+        // Assert
+        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
+        using (Assert.EnterMultipleScope())
+        {
+            var exceptionFailure = (ExceptionFailure<int>)resultAfterBind;
+            Assert.That(exceptionFailure.Exception, Is.Not.Null);
+            Assert.That(exceptionFailure.Exception, Is.EqualTo(exception));
+        }
+        
+    }
+
+    [Test]
+    public async Task When_SuccessParamAndValueFunctionThrowsException_Then_ReturnsExceptionFailureAsync()
+    {
+        // Arrange
+        const string testParam      = "Test";
+        var          startingResult = Success<int>.Create(42);
+        var          exception      = new Exception("Test Exception");
+        
+        // ReSharper disable once MoveLocalFunctionAfterJumpStatement
+        Task<IResult<int>> SuccessFunction(int value, string param, CancellationToken cancellationToken) => throw exception;
+        
+        //Act
+        var resultAfterBind = await startingResult.Bind(SuccessFunction, testParam, CancellationToken.None);
+        
+        // Assert
+        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
+        using (Assert.EnterMultipleScope())
+        {
+            var exceptionFailure = (ExceptionFailure<int>)resultAfterBind;
+            Assert.That(exceptionFailure.Exception, Is.Not.Null);
+            Assert.That(exceptionFailure.Exception, Is.EqualTo(exception));
+        }
+        
+    }
+
+    [Test]
+    public void When_SuccessParamFunctionThrowsException_Then_ReturnsExceptionFailure()
+    {
+        // Arrange
+        const string testParam      = "Test";
+        var          startingResult = Success<int>.Create(42);
+        var          exception      = new Exception("Test Exception");
+        
+        // ReSharper disable once MoveLocalFunctionAfterJumpStatement
+        IResult<int> SuccessFunction(string param) => throw exception;
+        
+        //Act
+        var resultAfterBind = startingResult.Bind(SuccessFunction, testParam);
+        
+        // Assert
+        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
+        using (Assert.EnterMultipleScope())
+        {
+            var exceptionFailure = (ExceptionFailure<int>)resultAfterBind;
+            Assert.That(exceptionFailure.Exception, Is.Not.Null);
+            Assert.That(exceptionFailure.Exception, Is.EqualTo(exception));
+        }
+        
+    }
+
+    [Test]
+    public async Task When_SuccessParamFunctionThrowsException_Then_ReturnsExceptionFailureAsync()
+    {
+        // Arrange
+        const string testParam      = "Test";
+        var          startingResult = Success<int>.Create(42);
+        var          exception      = new Exception("Test Exception");
+        
+        // ReSharper disable once MoveLocalFunctionAfterJumpStatement
+        Task<IResult<int>> SuccessFunction(string param, CancellationToken cancellationToken) => throw exception;
+        
+        //Act
+        var resultAfterBind = await startingResult.Bind(SuccessFunction, testParam, CancellationToken.None);
+        
+        // Assert
+        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
+        using (Assert.EnterMultipleScope())
+        {
+            var exceptionFailure = (ExceptionFailure<int>)resultAfterBind;
+            Assert.That(exceptionFailure.Exception, Is.Not.Null);
+            Assert.That(exceptionFailure.Exception, Is.EqualTo(exception));
+        }
+        
+    }
+
+    [Test]
+    public void When_SuccessNoParamFunctionThrowsException_Then_ReturnsExceptionFailure()
+    {
+        // Arrange
+        var          startingResult = Success<int>.Create(42);
+        var          exception      = new Exception("Test Exception");
+        
+        // ReSharper disable once MoveLocalFunctionAfterJumpStatement
+        IResult<int> SuccessFunction() => throw exception;
+        
+        //Act
+        var resultAfterBind = startingResult.Bind(SuccessFunction);
+        
+        // Assert
+        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
+        using (Assert.EnterMultipleScope())
+        {
+            var exceptionFailure = (ExceptionFailure<int>)resultAfterBind;
+            Assert.That(exceptionFailure.Exception, Is.Not.Null);
+            Assert.That(exceptionFailure.Exception, Is.EqualTo(exception));
+        }
+        
+    }
+
+    [Test]
+    public async Task When_SuccessNoParamFunctionThrowsException_Then_ReturnsExceptionFailureAsync()
+    {
+        // Arrange
+        var          startingResult = Success<int>.Create(42);
+        var          exception      = new Exception("Test Exception");
+        
+        // ReSharper disable once MoveLocalFunctionAfterJumpStatement
+        Task<IResult<int>> SuccessFunction(CancellationToken cancellationToken) => throw exception;
+        
+        //Act
+        var resultAfterBind = await startingResult.Bind(SuccessFunction, CancellationToken.None);
+        
+        // Assert
+        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
+        using (Assert.EnterMultipleScope())
+        {
+            var exceptionFailure = (ExceptionFailure<int>)resultAfterBind;
+            Assert.That(exceptionFailure.Exception, Is.Not.Null);
+            Assert.That(exceptionFailure.Exception, Is.EqualTo(exception));
+        }
+        
+    }
+
 }
