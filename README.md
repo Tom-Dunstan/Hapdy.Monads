@@ -5,6 +5,22 @@ Monad tools for C# coding. Follows the Programming on Rails, and Resulting patte
 ## Result Monads ##
 Result monad is a monad that represents a computation that may fail, and provides a way to handle errors in a functional way. These tools are based on the Result monad from Haskell, and include extension methods designed to support the Programming on Rails pattern.
 
+- [IResult<T> Interface](#iresultt-interface)
+  - [Success<T>](#successt-class)
+  - [Failure<T>](#failuret-class)
+  - [ExceptionFailure<T>](#exceptionfailuret-class)
+  - [ShortCircuit<T>](#shortcircuitt-class)
+- [Extensions](#extensions)
+  - [Bind()](#bind)
+  - [Map()](#map)
+  - [Match()](#match)
+  - [OnFailure()](#onfailure)
+  - [Catch()](#catch)
+  - [Validate()](#validate)
+  - [Then()](#then)
+  - [Unbox()](#unbox)
+
+
 ### IResult<T> Interface ###
 All monads implement this interface, and is the main expected return type for all monad methods. The included extension methods expect function to return this type.
 
@@ -42,7 +58,15 @@ The Failure monad contains the exception that was thrown during the operation as
 
 ```csharp
 // Example of a failed operation that returns an exception
-return ExceptionFailure<int>.Create(new DivideByZeroException(), "Cannot divide by zero");
+
+try
+{
+    return Success<int>.Create(10 / x);
+}
+catch (DivideByZeroException e)
+{
+    return ExceptionFailure<int>.Create(e);
+}
 ```
 
 ### ShortCircuit<T> ###
