@@ -28,9 +28,6 @@
       <Compile Update="Results\Extensions\ResultHelper.Then.cs">
         <DependentUpon>ResultHelper.cs</DependentUpon>
       </Compile>
-      <Compile Update="Results\Extensions\ResultHelper.Unbox.cs">
-        <DependentUpon>ResultHelper.cs</DependentUpon>
-      </Compile>
       <Compile Update="Results\Extensions\ResultHelper.Validate.cs">
         <DependentUpon>ResultHelper.cs</DependentUpon>
       </Compile>

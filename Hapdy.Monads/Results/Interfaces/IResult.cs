@@ -88,18 +88,6 @@ public interface IResult
         }
     }
 
-    // /// <summary>
-    // /// Validates a value/model
-    // /// </summary>
-    // /// <param name="value">Value/model to be validated</param>
-    // /// <param name="func">Validation function</param>
-    // /// <returns>Result of validation</returns>
-    // public static IResult<T> Validate<T>(
-    //     T?                   value
-    //   , Func<T?, IResult<T>> func)
-    //     where T : notnull
-    //     => Map(value, func);
-
     /// <summary>
     /// Validates a value/model
     /// </summary>

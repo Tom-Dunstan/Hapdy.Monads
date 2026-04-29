@@ -2,166 +2,53 @@
 
 public static partial class ResultHelper
 {
-    private static async Task<IResult<TValue>> RunFunctionWithCatchAsync<T, TValue>(
-        Func<T, CancellationToken, Task<IResult<TValue>>> func
-      , T                                                 value
-      , CancellationToken                                 cancellationToken)
-    {
-        try
-        {
-            return await func(value, cancellationToken);
-        }
-        catch (Exception e)
-        {
-            return new ExceptionFailure<TValue>(e);
-        }
-    }
-
-    private static async Task<IResult<TValue>> RunFunctionWithCatch<T, TValue>(
-        Func<T, CancellationToken, Task<IResult<TValue>>> func
-      , T                                                 value
-      , CancellationToken                                 cancellationToken)
-    {
-        try
-        {
-            return await func(value, cancellationToken);
-        }
-        catch (Exception e)
-        {
-            return new ExceptionFailure<TValue>(e);
-        }
-    }
-
-    private static async Task<IResult<TValue>> RunFunctionWithCatch<T, TParam, TValue>(
-        Func<T, TParam, CancellationToken, Task<IResult<TValue>>> func
-      , T                                                         value
-      , TParam                                                    param
-      , CancellationToken                                         cancellationToken)
-    {
-        try
-        {
-            return await func(value
-                            , param
-                     ,        cancellationToken);
-        }
-        catch (Exception e)
-        {
-            return new ExceptionFailure<TValue>(e);
-        }
-    }
-
-    private static async Task<IResult<TValue>> RunFunctionNoParamWithCatch<TValue>(
-        Func<CancellationToken, Task<IResult<TValue>>> func
-      , CancellationToken                              cancellationToken)
-    {
-        try
-        {
-            return await func(cancellationToken);
-        }
-        catch (Exception e)
-        {
-            return new ExceptionFailure<TValue>(e);
-        }
-    }
-
-    private static async Task<IResult<TValue>> RunParamFunctionWithCatch<TParam, TValue>(
-        Func<TParam, CancellationToken, Task<IResult<TValue>>> func
-      , TParam                                                 value
-      , CancellationToken                                      cancellationToken)
-    {
-        try
-        {
-            return await func(value, cancellationToken);
-        }
-        catch (Exception e)
-        {
-            return new ExceptionFailure<TValue>(e);
-        }
-    }
-
-    private static async Task<IResult<TValue>> RunFailureFunctionWithCatch<T, TValue>(
-        Func<IFailure<T>, CancellationToken, Task<IResult<TValue>>> func
-      , IFailure<T>                                                 failure
-      , CancellationToken                                           cancellationToken)
-    {
-        try
-        {
-            return await func(failure, cancellationToken);
-        }
-        catch (Exception e)
-        {
-            return new ExceptionFailure<TValue>(e);
-        }
-    }
-
-    private static IResult<TValue> RunFunctionWithCatch<T, TValue>(
-        Func<T, IResult<TValue>> func
-      , T                        value)
-    {
-        try
-        {
-            return func(value);
-        }
-        catch (Exception e)
-        {
-            return new ExceptionFailure<TValue>(e);
-        }
-    }
-
-    private static IResult<TValue> RunFunctionWithCatch<T, TParam, TValue>(
-        Func<T, TParam, IResult<TValue>> func
-      , T                                value
-      , TParam                           param)
-    {
-        try
-        {
-            return func(value, param);
-        }
-        catch (Exception e)
-        {
-            return new ExceptionFailure<TValue>(e);
-        }
-    }
-
-    private static IResult<TValue> RunFunctionNoParamWithCatch<TValue>(
-        Func<IResult<TValue>> func)
+    private static IResult<T> RunFunctionWithCatch<T>(Func<IResult<T>> func)
     {
         try
         {
             return func();
         }
-        catch (Exception e)
+        catch (Exception e) when (e is not OperationCanceledException)
         {
-            return new ExceptionFailure<TValue>(e);
+            return new ExceptionFailure<T>(e);
         }
     }
 
-    private static IResult<TValue> RunParamFunctionWithCatch<TParam, TValue>(
-        Func<TParam, IResult<TValue>> func
-      , TParam                        value)
+    private static async Task<IResult<T>> RunFunctionWithCatchAsync<T>(Func<Task<IResult<T>>> func)
     {
         try
         {
-            return func(value);
+            return await func();
         }
-        catch (Exception e)
+        catch (Exception e) when (e is not OperationCanceledException)
         {
-            return new ExceptionFailure<TValue>(e);
+            return new ExceptionFailure<T>(e);
         }
     }
 
-    private static IResult<TValue> RunFailureFunctionWithCatch<T, TValue>(
-        Func<IFailure<T>, IResult<TValue>> func
-      , IFailure<T>                        failure)
+    private static IResult<T> RunActionWithCatch<T>(IResult<T> result, Action action)
     {
         try
         {
-            return func(failure);
+            action();
+            return result;
         }
-        catch (Exception e)
+        catch (Exception e) when (e is not OperationCanceledException)
         {
-            return new ExceptionFailure<TValue>(e);
+            return new ExceptionFailure<T>(e);
         }
     }
 
+    private static async Task<IResult<T>> RunActionWithCatchAsync<T>(IResult<T> result, Func<Task> action)
+    {
+        try
+        {
+            await action();
+            return result;
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            return new ExceptionFailure<T>(e);
+        }
+    }
 }
