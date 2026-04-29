@@ -25,30 +25,4 @@ public static partial class ResultHelper
             return new ExceptionFailure<T>(e);
         }
     }
-
-    private static IResult<T> RunActionWithCatch<T>(IResult<T> result, Action action)
-    {
-        try
-        {
-            action();
-            return result;
-        }
-        catch (Exception e) when (e is not OperationCanceledException)
-        {
-            return new ExceptionFailure<T>(e);
-        }
-    }
-
-    private static async Task<IResult<T>> RunActionWithCatchAsync<T>(IResult<T> result, Func<Task> action)
-    {
-        try
-        {
-            await action();
-            return result;
-        }
-        catch (Exception e) when (e is not OperationCanceledException)
-        {
-            return new ExceptionFailure<T>(e);
-        }
-    }
 }
