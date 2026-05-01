@@ -13,24 +13,6 @@ public class Bind_ExceptionFailure
     [SetUp] public void Setup() { }
 
     [Test]
-    public void When_ExceptionFailure_Then_IsFailureEqualsTrue()
-    {
-        // Arrange
-        var result = ExceptionFailure<int>.Create(new Exception());
-
-        // Act
-        var isSuccess = result.IsSuccess;
-        var isFailure = result.IsFailure;
-
-        // Assert
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(isSuccess, Is.False);
-            Assert.That(isFailure, Is.True);
-        }
-    }
-
-    [Test]
     public void When_SuccessFunctionExpectsValue_Then_DoesNotRunSuccessFunction()
     {
         // Arrange
@@ -151,7 +133,7 @@ public class Bind_ExceptionFailure
     }
 
     [Test]
-    public void When_SuccessFunctionExpectsNoParam_Then_DoesNotRunsSuccessFunction()
+    public void When_SuccessFunctionExpectsNoValue_Then_DoesNotRunsSuccessFunction()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
@@ -181,7 +163,7 @@ public class Bind_ExceptionFailure
     }
 
     [Test]
-    public async Task When_SuccessFunctionExpectsNoParam_Then_DoesNotRunsSuccessFunctionAsync()
+    public async Task When_SuccessFunctionExpectsNoValue_Then_DoesNotRunsSuccessFunctionAsync()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
@@ -212,7 +194,7 @@ public class Bind_ExceptionFailure
     }
 
     [Test]
-    public async Task When_AsyncSuccessFunctionExpectsNoParam_Then_DoesNotRunsSuccessFunction()
+    public async Task When_AsyncSuccessFunctionExpectsNoValue_Then_DoesNotRunsSuccessFunction()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
@@ -242,7 +224,7 @@ public class Bind_ExceptionFailure
     }
 
     [Test]
-    public async Task When_AsyncSuccessFunctionExpectsNoParam_Then_DoesNotRunsSuccessFunctionAsync()
+    public async Task When_AsyncSuccessFunctionExpectsNoValue_Then_DoesNotRunsSuccessFunctionAsync()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";

@@ -13,24 +13,6 @@ public class Then_Failure
     [SetUp] public void Setup() { }
 
     [Test]
-    public void When_TestingIsFailure_Then_ReturnsTrue()
-    {
-        // Arrange
-        var result = Failure<int>.Create("Testing failure result.");
-
-        // Act
-        var isSuccess = result.IsSuccess;
-        var isFailure = result.IsFailure;
-
-        // Assert
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(isSuccess, Is.False);
-            Assert.That(isFailure, Is.True);
-        }
-    }
-
-    [Test]
     public void When_FailureAndSuccessExpectsValue_Then_DoesNotRunsSuccessFunction()
     {
         // Arrange

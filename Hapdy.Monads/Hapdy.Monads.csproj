@@ -31,6 +31,9 @@
       <Compile Update="Results\Extensions\ResultHelper.Validate.cs">
         <DependentUpon>ResultHelper.cs</DependentUpon>
       </Compile>
+      <Compile Update="Results\Extensions\ResultHelper.Tap.cs">
+        <DependentUpon>ResultHelper.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

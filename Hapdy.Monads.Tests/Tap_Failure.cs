@@ -3,12 +3,12 @@
 
 using Hapdy.Monads.Results.Extensions;
 
-namespace Hapdy.Monads.Results.Testing_Bind;
+namespace Hapdy.Monads.Results.Testing_Tap;
 
 [TestFixture(TestOf = typeof(Failure<>)
            , TestName = "Failure"
-           , Category = "1 - Bind")]
-public class Bind_Failure
+           , Category = "3 - Tap")]
+public class Tap_Failure
 {
     [SetUp] public void Setup() { }
 
@@ -21,14 +21,10 @@ public class Bind_Failure
         var          successFunctionWasCalled = false;
 
         // ReSharper disable once MoveLocalFunctionAfterJumpStatement
-        IResult<int> SuccessFunction(int value)
-        {
-            successFunctionWasCalled = true;
-            return Success<int>.Create(value * 2);
-        }
+        void SuccessFunction(int value) { successFunctionWasCalled = true; }
 
         // Act
-        var resultAfterBind = startingResult.Bind(SuccessFunction);
+        var resultAfterBind = startingResult.Tap(SuccessFunction);
 
         // Assert
         Assert.That(resultAfterBind, Is.InstanceOf<Failure<int>>());
@@ -37,6 +33,7 @@ public class Bind_Failure
             Assert.That(successFunctionWasCalled, Is.False);
             var failureResult = (Failure<int>)resultAfterBind;
             Assert.That(failureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
+            Assert.That(resultAfterBind,            Is.EqualTo(startingResult));
         }
     }
 
@@ -49,14 +46,14 @@ public class Bind_Failure
         var          successFunctionWasCalled = false;
 
         // ReSharper disable once MoveLocalFunctionAfterJumpStatement
-        Task<IResult<int>> SuccessFunction(int value, CancellationToken cancellationToken)
+        Task SuccessFunction(int value, CancellationToken cancellationToken)
         {
             successFunctionWasCalled = true;
-            return Task.FromResult((IResult<int>)Success<int>.Create(value * 2));
+            return Task.CompletedTask;
         }
 
         // Act
-        var resultAfterBind = await startingResult.Bind(SuccessFunction, CancellationToken.None);
+        var resultAfterBind = await startingResult.Tap(SuccessFunction, CancellationToken.None);
 
         // Assert
         Assert.That(resultAfterBind, Is.InstanceOf<Failure<int>>());
@@ -65,6 +62,7 @@ public class Bind_Failure
             Assert.That(successFunctionWasCalled, Is.False);
             var failureResult = (Failure<int>)resultAfterBind;
             Assert.That(failureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
+            Assert.That(resultAfterBind,            Is.EqualTo(startingResult));
         }
     }
 
@@ -73,18 +71,15 @@ public class Bind_Failure
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
-        var          startingResult           = Task.FromResult((IResult<int>)Failure<int>.Create(testErrorMessage));
+        IResult<int> syncResult               = Failure<int>.Create(testErrorMessage);
+        var          startingResult           = Task.FromResult(syncResult);
         var          successFunctionWasCalled = false;
 
         // ReSharper disable once MoveLocalFunctionAfterJumpStatement
-        IResult<int> SuccessFunction(int value)
-        {
-            successFunctionWasCalled = true;
-            return Success<int>.Create(value * 2);
-        }
+        void SuccessFunction(int value) { successFunctionWasCalled = true; }
 
         // Act
-        var resultAfterBind = await startingResult.Bind(SuccessFunction);
+        var resultAfterBind = await startingResult.Tap(SuccessFunction);
 
         // Assert
         Assert.That(resultAfterBind, Is.InstanceOf<Failure<int>>());
@@ -93,6 +88,7 @@ public class Bind_Failure
             Assert.That(successFunctionWasCalled, Is.False);
             var failureResult = (Failure<int>)resultAfterBind;
             Assert.That(failureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
+            Assert.That(resultAfterBind,            Is.EqualTo(syncResult));
         }
     }
 
@@ -101,18 +97,19 @@ public class Bind_Failure
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
-        var          startingResult           = Task.FromResult((IResult<int>)Failure<int>.Create(testErrorMessage));
+        IResult<int> syncResult               = Failure<int>.Create(testErrorMessage);
+        var          startingResult           = Task.FromResult(syncResult);
         var          successFunctionWasCalled = false;
 
         // ReSharper disable once MoveLocalFunctionAfterJumpStatement
-        Task<IResult<int>> SuccessFunction(int value, CancellationToken cancellationToken)
+        Task SuccessFunction(int value, CancellationToken cancellationToken)
         {
             successFunctionWasCalled = true;
-            return Task.FromResult((IResult<int>)Success<int>.Create(value * 2));
+            return Task.CompletedTask;
         }
 
         // Act
-        var resultAfterBind = await startingResult.Bind(SuccessFunction, CancellationToken.None);
+        var resultAfterBind = await startingResult.Tap(SuccessFunction, CancellationToken.None);
 
         // Assert
         Assert.That(resultAfterBind, Is.InstanceOf<Failure<int>>());
@@ -121,6 +118,7 @@ public class Bind_Failure
             Assert.That(successFunctionWasCalled, Is.False);
             var failureResult = (Failure<int>)resultAfterBind;
             Assert.That(failureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
+            Assert.That(resultAfterBind,            Is.EqualTo(syncResult));
         }
     }
 
@@ -133,14 +131,10 @@ public class Bind_Failure
         var          successFunctionWasCalled = false;
 
         // ReSharper disable once MoveLocalFunctionAfterJumpStatement
-        IResult<int> SuccessFunction()
-        {
-            successFunctionWasCalled = true;
-            return Success<int>.Create(0);
-        }
+        void SuccessFunction() { successFunctionWasCalled = true; }
 
         // Act
-        var resultAfterBind = startingResult.Bind(SuccessFunction);
+        var resultAfterBind = startingResult.Tap(SuccessFunction);
 
         // Assert
         Assert.That(resultAfterBind, Is.InstanceOf<Failure<int>>());
@@ -149,6 +143,7 @@ public class Bind_Failure
             Assert.That(successFunctionWasCalled, Is.False);
             var failureResult = (Failure<int>)resultAfterBind;
             Assert.That(failureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
+            Assert.That(resultAfterBind,            Is.EqualTo(startingResult));
         }
     }
 
@@ -161,15 +156,15 @@ public class Bind_Failure
         var          successFunctionWasCalled = false;
 
         // ReSharper disable once MoveLocalFunctionAfterJumpStatement
-        Task<IResult<int>> SuccessFunction(CancellationToken cancellationToken)
+        Task SuccessFunction(CancellationToken cancellationToken)
         {
             successFunctionWasCalled = true;
-            return Task.FromResult((IResult<int>)Success<int>.Create(0));
+            return Task.CompletedTask;
         }
 
         // Act
-        var resultAfterBind = await startingResult.Bind(SuccessFunction
-                                                      , CancellationToken.None);
+        var resultAfterBind = await startingResult.Tap(SuccessFunction
+                                                     , CancellationToken.None);
 
         // Assert
         Assert.That(resultAfterBind, Is.InstanceOf<Failure<int>>());
@@ -178,6 +173,7 @@ public class Bind_Failure
             Assert.That(successFunctionWasCalled, Is.False);
             var failureResult = (Failure<int>)resultAfterBind;
             Assert.That(failureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
+            Assert.That(resultAfterBind,            Is.EqualTo(startingResult));
         }
     }
 
@@ -186,18 +182,15 @@ public class Bind_Failure
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
-        var          startingResult           = Task.FromResult((IResult<int>)Failure<int>.Create(testErrorMessage));
+        IResult<int> syncResult               = Failure<int>.Create(testErrorMessage);
+        var          startingResult           = Task.FromResult(syncResult);
         var          successFunctionWasCalled = false;
 
         // ReSharper disable once MoveLocalFunctionAfterJumpStatement
-        IResult<int> SuccessFunction()
-        {
-            successFunctionWasCalled = true;
-            return Success<int>.Create(0);
-        }
+        void SuccessFunction() { successFunctionWasCalled = true; }
 
         // Act
-        var resultAfterBind = await startingResult.Bind(SuccessFunction);
+        var resultAfterBind = await startingResult.Tap(SuccessFunction);
 
         // Assert
         Assert.That(resultAfterBind, Is.InstanceOf<Failure<int>>());
@@ -206,6 +199,7 @@ public class Bind_Failure
             Assert.That(successFunctionWasCalled, Is.False);
             var failureResult = (Failure<int>)resultAfterBind;
             Assert.That(failureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
+            Assert.That(resultAfterBind,            Is.EqualTo(syncResult));
         }
     }
 
@@ -214,19 +208,20 @@ public class Bind_Failure
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
-        var          startingResult           = Task.FromResult((IResult<int>)Failure<int>.Create(testErrorMessage));
+        IResult<int> syncResult               = Failure<int>.Create(testErrorMessage);
+        var          startingResult           = Task.FromResult(syncResult);
         var          successFunctionWasCalled = false;
 
         // ReSharper disable once MoveLocalFunctionAfterJumpStatement
-        Task<IResult<int>> SuccessFunction(CancellationToken cancellationToken)
+        Task SuccessFunction(CancellationToken cancellationToken)
         {
             successFunctionWasCalled = true;
-            return Task.FromResult((IResult<int>)Success<int>.Create(0));
+            return Task.CompletedTask;
         }
 
         // Act
-        var resultAfterBind = await startingResult.Bind(SuccessFunction
-                                                      , CancellationToken.None);
+        var resultAfterBind = await startingResult.Tap(SuccessFunction
+                                                     , CancellationToken.None);
 
         // Assert
         Assert.That(resultAfterBind, Is.InstanceOf<Failure<int>>());
@@ -235,7 +230,7 @@ public class Bind_Failure
             Assert.That(successFunctionWasCalled, Is.False);
             var failureResult = (Failure<int>)resultAfterBind;
             Assert.That(failureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
+            Assert.That(resultAfterBind,            Is.EqualTo(syncResult));
         }
     }
-   
 }
