@@ -13,7 +13,7 @@ public class Bind_ExceptionFailure
     [SetUp] public void Setup() { }
 
     [Test]
-    public void When_SuccessFunctionExpectsValue_Then_DoesNotRunSuccessFunction()
+    public void When_SuccessFunctionExpectsValue_Then_DoesNotRunuccessFunction()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
@@ -43,7 +43,7 @@ public class Bind_ExceptionFailure
     }
 
     [Test]
-    public async Task When_SuccessFunctionExpectsValue_Then_DoesNotRunsSuccessFunctionAsync()
+    public async Task When_SuccessFunctionExpectsValue_Then_DoesNotRunuccessFunctionAsync()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
@@ -73,7 +73,7 @@ public class Bind_ExceptionFailure
     }
 
     [Test]
-    public async Task When_AsyncSuccessFunctionExpectsValue_Then_DoesNotRunsSuccessFunction()
+    public async Task When_AsyncSuccessFunctionExpectsValue_Then_DoesNotRunuccessFunction()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
@@ -103,7 +103,7 @@ public class Bind_ExceptionFailure
     }
 
     [Test]
-    public async Task When_AsyncSuccessFunctionExpectsValue_Then_DoesNotRunsSuccessFunctionAsync()
+    public async Task When_AsyncSuccessFunctionExpectsValue_Then_DoesNotRunuccessFunctionAsync()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
@@ -133,7 +133,7 @@ public class Bind_ExceptionFailure
     }
 
     [Test]
-    public void When_SuccessFunctionExpectsNoValue_Then_DoesNotRunsSuccessFunction()
+    public void When_SuccessFunctionExpectsNoValue_Then_DoesNotRunuccessFunction()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
@@ -163,7 +163,7 @@ public class Bind_ExceptionFailure
     }
 
     [Test]
-    public async Task When_SuccessFunctionExpectsNoValue_Then_DoesNotRunsSuccessFunctionAsync()
+    public async Task When_SuccessFunctionExpectsNoValue_Then_DoesNotRunuccessFunctionAsync()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
@@ -194,7 +194,7 @@ public class Bind_ExceptionFailure
     }
 
     [Test]
-    public async Task When_AsyncSuccessFunctionExpectsNoValue_Then_DoesNotRunsSuccessFunction()
+    public async Task When_AsyncSuccessFunctionExpectsNoValue_Then_DoesNotRunuccessFunction()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
@@ -224,7 +224,7 @@ public class Bind_ExceptionFailure
     }
 
     [Test]
-    public async Task When_AsyncSuccessFunctionExpectsNoValue_Then_DoesNotRunsSuccessFunctionAsync()
+    public async Task When_AsyncSuccessFunctionExpectsNoValue_Then_DoesNotRunuccessFunctionAsync()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";

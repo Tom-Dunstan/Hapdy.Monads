@@ -13,7 +13,7 @@ public class Then_Failure
     [SetUp] public void Setup() { }
 
     [Test]
-    public void When_FailureAndSuccessExpectsValue_Then_DoesNotRunsSuccessFunction()
+    public void When_FailureAndSuccessExpectsValue_Then_DoesNotRunSuccessFunction()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
@@ -41,7 +41,7 @@ public class Then_Failure
     }
 
     [Test]
-    public async Task When_FailureAndSuccessExpectsValue_Then_DoesNotRunsSuccessFunctionAsync()
+    public async Task When_FailureAndSuccessExpectsValue_Then_DoesNotRunSuccessFunctionAsync()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
@@ -69,7 +69,7 @@ public class Then_Failure
     }
 
     [Test]
-    public async Task When_AsyncFailureAndSuccessExpectsValue_Then_DoesNotRunsSuccessFunction()
+    public async Task When_AsyncFailureAndSuccessExpectsValue_Then_DoesNotRunSuccessFunction()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
@@ -97,7 +97,7 @@ public class Then_Failure
     }
 
     [Test]
-    public async Task When_AsyncFailureAndSuccessExpectsValue_Then_DoesNotRunsSuccessFunctionAsync()
+    public async Task When_AsyncFailureAndSuccessExpectsValue_Then_DoesNotRunSuccessFunctionAsync()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
@@ -125,7 +125,7 @@ public class Then_Failure
     }
 
     [Test]
-    public void When_FailureAndSuccessExpectsNoParam_Then_DoesNotRunsSuccessFunction()
+    public void When_FailureAndSuccessExpectsNoParam_Then_DoesNotRunSuccessFunction()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
@@ -153,7 +153,7 @@ public class Then_Failure
     }
 
     [Test]
-    public async Task When_FailureAndSuccessExpectsNoParam_Then_DoesNotRunsSuccessFunctionAsync()
+    public async Task When_FailureAndSuccessExpectsNoParam_Then_DoesNotRunSuccessFunctionAsync()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
@@ -182,7 +182,7 @@ public class Then_Failure
     }
 
     [Test]
-    public async Task When_AsyncFailureAndSuccessExpectsNoParam_Then_DoesNotRunsSuccessFunction()
+    public async Task When_AsyncFailureAndSuccessExpectsNoParam_Then_DoesNotRunSuccessFunction()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
@@ -210,7 +210,7 @@ public class Then_Failure
     }
 
     [Test]
-    public async Task When_AsyncFailureAndSuccessExpectsNoParam_Then_DoesNotRunsSuccessFunctionAsync()
+    public async Task When_AsyncFailureAndSuccessExpectsNoParam_Then_DoesNotRunSuccessFunctionAsync()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";

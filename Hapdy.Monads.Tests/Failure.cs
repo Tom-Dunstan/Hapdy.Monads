@@ -1,7 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 // ReSharper disable CheckNamespace
 
-namespace Hapdy.Monads.Results.Testing_Success;
+namespace Hapdy.Monads.Results.Testing_Failure;
 
 [TestFixture(TestOf = typeof(Failure<>)
            , TestName = "Failure"
