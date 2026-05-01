@@ -32,7 +32,7 @@ public class Bind_Success
     }
 
     [Test]
-    public void When_SuccessAndExpectsValue_Then_RunsSuccessFunction()
+    public void When_SuccessFunctionExpectsValue_Then_RunsSuccessFunction()
     {
         // Arrange
         const int testValue                    = 42;
@@ -60,7 +60,7 @@ public class Bind_Success
     }
 
     [Test]
-    public async Task When_SuccessAndExpectsValue_Then_RunsSuccessFunctionAsync()
+    public async Task When_SuccessFunctionExpectsValue_Then_RunsSuccessFunctionAsync()
     {
         // Arrange
         var  startingResult               = Success<int>.Create(42);
@@ -86,7 +86,7 @@ public class Bind_Success
     }
 
     [Test]
-    public async Task When_AsyncSuccessAndExpectsValue_Then_RunsSuccessFunction()
+    public async Task When_AsyncSuccessFunctionExpectsValue_Then_RunsSuccessFunction()
     {
         // Arrange
         var  startingResult               = Task.FromResult((IResult<int>)Success<int>.Create(42));
@@ -112,7 +112,7 @@ public class Bind_Success
     }
 
     [Test]
-    public async Task When_AsyncSuccessAndExpectsValue_Then_RunsSuccessFunctionAsync()
+    public async Task When_AsyncSuccessFunctionExpectsValue_Then_RunsSuccessFunctionAsync()
     {
         // Arrange
         var  startingResult               = Task.FromResult((IResult<int>)Success<int>.Create(42));
@@ -138,7 +138,7 @@ public class Bind_Success
     }
 
     [Test]
-    public void When_SuccessAndExpectsNoParamOrValue_Then_RunsSuccessFunction()
+    public void When_SuccessFunctionExpectsNoValueAndReturnsDifferentType_Then_RunsSuccessFunction()
     {
         // Arrange
         const int    testValue           = 42;
@@ -167,7 +167,7 @@ public class Bind_Success
     }
 
     [Test]
-    public async Task When_SuccessAndExpectsNoParamOrValue_Then_RunsSuccessFunctionAsync()
+    public async Task When_SuccessFunctionExpectsNoValue_Then_RunsSuccessFunctionAsync()
     {
         // Arrange
         const int    testValue           = 42;
@@ -196,7 +196,7 @@ public class Bind_Success
     }
 
     [Test]
-    public async Task When_AsyncSuccessAndExpectsNoParamOrValue_Then_RunsSuccessFunction()
+    public async Task When_AsyncSuccessFunctionExpectsNoValue_Then_RunsSuccessFunction()
     {
         // Arrange
         const int    testValue           = 42;
@@ -225,7 +225,7 @@ public class Bind_Success
     }
 
     [Test]
-    public async Task When_AsyncSuccessAndExpectsNoParamOrValue_Then_RunsSuccessFunctionAsync()
+    public async Task When_AsyncSuccessFunctionExpectsNoValue_Then_RunsSuccessFunctionAsync()
     {
         // Arrange
         const int    testValue           = 42;

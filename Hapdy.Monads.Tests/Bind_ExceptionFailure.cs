@@ -6,17 +6,17 @@ using Hapdy.Monads.Results.Extensions;
 namespace Hapdy.Monads.Results.Testing_Bind;
 
 [TestFixture(TestOf = typeof(Failure<>)
-           , TestName = "Failure"
+           , TestName = "ExceptionFailure"
            , Category = "1 - Bind")]
-public class Bind_Failure
+public class Bind_ExceptionFailure
 {
     [SetUp] public void Setup() { }
 
     [Test]
-    public void When_TestingIsFailure_Then_ReturnsTrue()
+    public void When_ExceptionFailure_Then_IsFailureEqualsTrue()
     {
         // Arrange
-        var result = Failure<int>.Create("Testing failure result.");
+        var result = ExceptionFailure<int>.Create(new Exception());
 
         // Act
         var isSuccess = result.IsSuccess;
@@ -31,11 +31,12 @@ public class Bind_Failure
     }
 
     [Test]
-    public void When_SuccessFunctionExpectsValue_Then_DoesNotRunsSuccessFunction()
+    public void When_SuccessFunctionExpectsValue_Then_DoesNotRunSuccessFunction()
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
-        var          startingResult           = Failure<int>.Create(testErrorMessage);
+        var          testException            = new Exception(testErrorMessage);
+        var          startingResult           = ExceptionFailure<int>.Create(testException);
         var          successFunctionWasCalled = false;
 
         // ReSharper disable once MoveLocalFunctionAfterJumpStatement
@@ -49,12 +50,13 @@ public class Bind_Failure
         var resultAfterBind = startingResult.Bind(SuccessFunction);
 
         // Assert
-        Assert.That(resultAfterBind, Is.InstanceOf<Failure<int>>());
+        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
         using (Assert.EnterMultipleScope())
         {
             Assert.That(successFunctionWasCalled, Is.False);
-            var failureResult = (Failure<int>)resultAfterBind;
-            Assert.That(failureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
+            var exceptionFailureResult = (ExceptionFailure<int>)resultAfterBind;
+            Assert.That(exceptionFailureResult.Exception,    Is.EqualTo(testException));
+            Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
         }
     }
 
@@ -63,7 +65,8 @@ public class Bind_Failure
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
-        var          startingResult           = Failure<int>.Create(testErrorMessage);
+        var          testException            = new Exception(testErrorMessage);
+        var          startingResult           = ExceptionFailure<int>.Create(testException);
         var          successFunctionWasCalled = false;
 
         // ReSharper disable once MoveLocalFunctionAfterJumpStatement
@@ -77,12 +80,13 @@ public class Bind_Failure
         var resultAfterBind = await startingResult.Bind(SuccessFunction, CancellationToken.None);
 
         // Assert
-        Assert.That(resultAfterBind, Is.InstanceOf<Failure<int>>());
+        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
         using (Assert.EnterMultipleScope())
         {
             Assert.That(successFunctionWasCalled, Is.False);
-            var failureResult = (Failure<int>)resultAfterBind;
-            Assert.That(failureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
+            var exceptionFailure = (ExceptionFailure<int>)resultAfterBind;
+            Assert.That(exceptionFailure.Exception,    Is.EqualTo(testException));
+            Assert.That(exceptionFailure.ErrorMessage, Is.EqualTo(testErrorMessage));
         }
     }
 
@@ -91,7 +95,8 @@ public class Bind_Failure
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
-        var          startingResult           = Task.FromResult((IResult<int>)Failure<int>.Create(testErrorMessage));
+        var          testException            = new Exception(testErrorMessage);
+        var          startingResult           = Task.FromResult((IResult<int>)ExceptionFailure<int>.Create(testException));
         var          successFunctionWasCalled = false;
 
         // ReSharper disable once MoveLocalFunctionAfterJumpStatement
@@ -105,12 +110,13 @@ public class Bind_Failure
         var resultAfterBind = await startingResult.Bind(SuccessFunction);
 
         // Assert
-        Assert.That(resultAfterBind, Is.InstanceOf<Failure<int>>());
+        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
         using (Assert.EnterMultipleScope())
         {
             Assert.That(successFunctionWasCalled, Is.False);
-            var failureResult = (Failure<int>)resultAfterBind;
-            Assert.That(failureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
+            var exceptionFailureResult = (ExceptionFailure<int>)resultAfterBind;
+            Assert.That(exceptionFailureResult.Exception,    Is.EqualTo(testException));
+            Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
         }
     }
 
@@ -119,7 +125,8 @@ public class Bind_Failure
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
-        var          startingResult           = Task.FromResult((IResult<int>)Failure<int>.Create(testErrorMessage));
+        var          testException            = new Exception(testErrorMessage);
+        var          startingResult           = Task.FromResult((IResult<int>)ExceptionFailure<int>.Create(testException));
         var          successFunctionWasCalled = false;
 
         // ReSharper disable once MoveLocalFunctionAfterJumpStatement
@@ -133,12 +140,13 @@ public class Bind_Failure
         var resultAfterBind = await startingResult.Bind(SuccessFunction, CancellationToken.None);
 
         // Assert
-        Assert.That(resultAfterBind, Is.InstanceOf<Failure<int>>());
+        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
         using (Assert.EnterMultipleScope())
         {
             Assert.That(successFunctionWasCalled, Is.False);
-            var failureResult = (Failure<int>)resultAfterBind;
-            Assert.That(failureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
+            var exceptionFailureResult = (ExceptionFailure<int>)resultAfterBind;
+            Assert.That(exceptionFailureResult.Exception,    Is.EqualTo(testException));
+            Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
         }
     }
 
@@ -147,7 +155,8 @@ public class Bind_Failure
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
-        var          startingResult           = Failure<int>.Create(testErrorMessage);
+        var          testException            = new Exception(testErrorMessage);
+        var          startingResult           = ExceptionFailure<int>.Create(testException);
         var          successFunctionWasCalled = false;
 
         // ReSharper disable once MoveLocalFunctionAfterJumpStatement
@@ -161,12 +170,13 @@ public class Bind_Failure
         var resultAfterBind = startingResult.Bind(SuccessFunction);
 
         // Assert
-        Assert.That(resultAfterBind, Is.InstanceOf<Failure<int>>());
+        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
         using (Assert.EnterMultipleScope())
         {
             Assert.That(successFunctionWasCalled, Is.False);
-            var failureResult = (Failure<int>)resultAfterBind;
-            Assert.That(failureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
+            var exceptionFailureResult = (ExceptionFailure<int>)resultAfterBind;
+            Assert.That(exceptionFailureResult.Exception,    Is.EqualTo(testException));
+            Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
         }
     }
 
@@ -175,7 +185,8 @@ public class Bind_Failure
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
-        var          startingResult           = Failure<int>.Create(testErrorMessage);
+        var          testException            = new Exception(testErrorMessage);
+        var          startingResult           = ExceptionFailure<int>.Create(testException);
         var          successFunctionWasCalled = false;
 
         // ReSharper disable once MoveLocalFunctionAfterJumpStatement
@@ -190,12 +201,13 @@ public class Bind_Failure
                                                       , CancellationToken.None);
 
         // Assert
-        Assert.That(resultAfterBind, Is.InstanceOf<Failure<int>>());
+        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
         using (Assert.EnterMultipleScope())
         {
             Assert.That(successFunctionWasCalled, Is.False);
-            var failureResult = (Failure<int>)resultAfterBind;
-            Assert.That(failureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
+            var exceptionFailureResult = (ExceptionFailure<int>)resultAfterBind;
+            Assert.That(exceptionFailureResult.Exception,    Is.EqualTo(testException));
+            Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
         }
     }
 
@@ -204,7 +216,8 @@ public class Bind_Failure
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
-        var          startingResult           = Task.FromResult((IResult<int>)Failure<int>.Create(testErrorMessage));
+        var          testException            = new Exception(testErrorMessage);
+        var          startingResult           = Task.FromResult((IResult<int>)ExceptionFailure<int>.Create(testException));
         var          successFunctionWasCalled = false;
 
         // ReSharper disable once MoveLocalFunctionAfterJumpStatement
@@ -218,12 +231,13 @@ public class Bind_Failure
         var resultAfterBind = await startingResult.Bind(SuccessFunction);
 
         // Assert
-        Assert.That(resultAfterBind, Is.InstanceOf<Failure<int>>());
+        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
         using (Assert.EnterMultipleScope())
         {
             Assert.That(successFunctionWasCalled, Is.False);
-            var failureResult = (Failure<int>)resultAfterBind;
-            Assert.That(failureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
+            var exceptionFailureResult = (ExceptionFailure<int>)resultAfterBind;
+            Assert.That(exceptionFailureResult.Exception,    Is.EqualTo(testException));
+            Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
         }
     }
 
@@ -232,7 +246,8 @@ public class Bind_Failure
     {
         // Arrange
         const string testErrorMessage         = "Testing binding failure result.";
-        var          startingResult           = Task.FromResult((IResult<int>)Failure<int>.Create(testErrorMessage));
+        var          testException            = new Exception(testErrorMessage);
+        var          startingResult           = Task.FromResult((IResult<int>)ExceptionFailure<int>.Create(testException));
         var          successFunctionWasCalled = false;
 
         // ReSharper disable once MoveLocalFunctionAfterJumpStatement
@@ -247,13 +262,14 @@ public class Bind_Failure
                                                       , CancellationToken.None);
 
         // Assert
-        Assert.That(resultAfterBind, Is.InstanceOf<Failure<int>>());
+        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
         using (Assert.EnterMultipleScope())
         {
             Assert.That(successFunctionWasCalled, Is.False);
-            var failureResult = (Failure<int>)resultAfterBind;
-            Assert.That(failureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
+            var exceptionFailureResult = (ExceptionFailure<int>)resultAfterBind;
+            Assert.That(exceptionFailureResult.Exception,    Is.EqualTo(testException));
+            Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
         }
     }
-   
+
 }
