@@ -1,18 +1,18 @@
 # Hapdy.Monads
-## Description ##
+## Description
 Monad tools for C# coding. Follows the Programming on Rails, and Resulting patterns
 
-## Result Monads ##
+## Result Monads
 Result monad is a monad that represents a computation that may fail, and provides a way to handle errors in a functional way. These tools are based on the Result monad from Haskell, and include extension methods designed to support the Programming on Rails pattern.
 
 - [Examples](#examples)
-- [IResult<T> Interface](#iresult-interface)
-  - [Success<T>](#success)
-  - [Failure<T>](#failure)
-  - [ExceptionFailure<T>](#exceptionfailure)
-  - [ShortCircuit<T>](#shortcircuit)
+- [IResult<T> Interface](#iresultt-interface)
+  - [Success<T>](#successt)
+  - [Failure<T>](#failuret)
+  - [ExceptionFailure<T>](#exceptionfailuret)
 - [Extensions](#extensions)
   - [Bind()](#bind)
+  - [Tap()](#tap)
   - [Map()](#map)
   - [Match()](#match)
   - [OnFailure()](#onfailure)
@@ -21,14 +21,14 @@ Result monad is a monad that represents a computation that may fail, and provide
   - [Then()](#then)
   - [Unbox()](#unbox)
 
-### IResult<T> Interface ###
+### IResult<T> Interface
 All monads implement this interface, and is the main expected return type for all monad methods. The included extension methods expect function to return this type.
 
 Has two properties:
 - IsSuccess: A boolean indicating the monad represents a successful operation if true.
 - IsFailure: A boolean indicating the monad represents a failed operation if true.
 
-### Success<T> ###
+### Success<T>
 A monad that represents a successful computation of an operation.
 
 The Success monad contains the resulting value of the operation, which is of type T.
@@ -41,7 +41,7 @@ return new Success<int>(10);
 return Success<int>.Create(10);
 ```
 
-### Failure<T> ###
+### Failure<T>
 A monad that represents a failed computation of an operation.
 
 The Failure monad contains the error message that represents the returned failure reasoning.
@@ -51,7 +51,7 @@ The Failure monad contains the error message that represents the returned failur
 return Failure<int>.Create("Cannot divide by zero");
 ```
 
-### ExceptionFailure<T> ###
+### ExceptionFailure<T>
 A monad that represents a failed computation of an operation, and wraps an exception.
 
 The Failure monad contains the exception that was thrown during the operation as well as the error message of a Failure monad.
@@ -69,23 +69,14 @@ catch (DivideByZeroException e)
 }
 ```
 
-### ShortCircuit<T> ###
-A monad that represents a successful completion of an operation, but is not expected to trigger the next operation.
-
-As and example an operation may result in an empty array. This is may not be a failure in a search operation, however the subsequent operations may not be required so the system can short circuit to the end.
-
-The ShortCircuit<T> monad contains the value of the operation similar to the Success monad. However as in must traverse subsequent operations, the value is boxed as an object. As such, to retrieve the value it must be unboxed via the Unbox method.
-
-**Note:** This is an experimental feature, as it breaks separation of concerns.
-
 ```csharp
 // Example of a successful operation that returns an empty array
 return ShortCircuit<int>.Create(new int[]);
 ```
 
-## Extensions ##
+## Extensions
 
-### Bind() ###
+### Bind()
 Binds the value of the IResult<T> to the next operation.
 
 This is the main method used to chain monads together.
@@ -106,7 +97,18 @@ IResult<string> result = Success<int>(5).Create
                                         .Bind(x => new Success<string>(x.ToString()));
 ```
 
-### Map() ###
+### Tap()
+Similar to the [Bind()](#bind) method, except does not expect a return from the function passed on success. Instead returns the previous result to allow more chaining
+
+```csharp
+// Example of Tap method
+void LogResult(int value) => Console.WriteLine($"The value was {value}"); 
+
+Success<int> result = Success<int>.Create(10)
+                                  .Tap(LogResult); // Prints 10
+```
+
+### Map()
 Can be used to crate an IResult<T> from a value or existing IResult<T>.
 ```csharp
 // Example of creating an IResult<T> from an existing value
@@ -116,10 +118,10 @@ var result = IResult.Map<int>(5);
 It can also take a transform function to map the value of the IResult<T>.
 ```csharp
 // Example of creating an IResult<T> from an existing value
-var result = IResult.Map<int>(5, Success<int>.Create(x => x * 2));
+var result = IResult.Map<int>(5, x => Success<int>.Create(x * 2));
 ```
 
-### Match() ###
+### Match()
 Matches the IResult<T> to the appropriate action based on the type of IResult<T>.
 ```csharp
 // Example of matching the IResult<T> to the appropriate action
@@ -134,7 +136,7 @@ IResult<string> result = IResult.Map(5)
                                 .Match(celebrate,morn);
 ```
 
-### OnFailure() ###
+### OnFailure()
 Executes the provided action if the IResult<T> is a Failure.
 ```csharp
 // Example of executing the provided action if the IResult<T> is a Failure
@@ -144,7 +146,7 @@ IResult<int> fail = Failure<int>.Create(
 var result = fail.OnFailure(failure => Console.WriteLine(failure.ErrorMessage));
 ```
 
-### Catch() ###
+### Catch()
 Executes the provided action if the IResult<T> is a Failure.
 ```csharp
 // Example of executing the provided action if the IResult<T> is a Failure
@@ -152,7 +154,7 @@ IResult<int> result = ExceptionFailure<int>.Create( new DivideByZeroException() 
 result.Catch(exceptionFailure => Console.WriteLine(exceptionFailure.Exception.ErrorMessage));
 ```
 
-### Validate() ###
+### Validate()
 Validates the IResult<T> against a predicate.
 ```csharp
 // Example of validating the IResult<T> against a predicate
@@ -162,7 +164,7 @@ var result.Validate(x => x < 0
                       : Success<int>.Create(x));
 ```
 
-### Then() ###
+### Then()
 Is an alias for Bind(). Using the Then method is the same as using the Bind method, but creates a semantic flow that mimics English.
 
 ```csharp
@@ -173,7 +175,7 @@ var result = IResult.Map(5)
                     .Then(PrintValueOfX);
 ```
 
-### Unbox() ###
+### Unbox()
 Unboxes the value of a ShortCircuit<T> monad and returns a Success<T>.
 ```csharp
 // Example of unboxing the value of a ShortCircuit<T> monad
@@ -181,4 +183,4 @@ ShortCircuit<int> shortCircuit = ShortCircuit<int>.Create(5);
 int value = shortCircuit.Unbox().Value;
 ```
 
-## Examples ##
+## Examples
