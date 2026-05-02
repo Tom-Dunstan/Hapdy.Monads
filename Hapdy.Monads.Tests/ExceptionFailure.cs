@@ -16,7 +16,7 @@ public class ExceptionFailure
         // Arrange
         const string testErrorMessage = "Test Error Message";
         var          testException    = new Exception(testErrorMessage);
-        var          result           = ExceptionFailure<int>.Create(testException);
+        IResult      result           = ExceptionFailure<int>.Create(testException);
 
         // Act
         var isSuccess = result.IsSuccess;
@@ -24,10 +24,10 @@ public class ExceptionFailure
 
         // Assert
         Assert.Multiple(() =>
-        {
-            Assert.That(isSuccess, Is.False);
-            Assert.That(isFailure, Is.True);
-        });
+                        {
+                            Assert.That(isSuccess, Is.False);
+                            Assert.That(isFailure, Is.True);
+                        });
     }
 
 }

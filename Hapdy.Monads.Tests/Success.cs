@@ -14,7 +14,7 @@ public class Success
     public void When_TestingIsSuccess_Then_ReturnsTrue()
     {
         // Arrange
-        var result = Success<int>.Create(42);
+        IResult<int> result = Success<int>.Create(42);
 
         // Act
         var isSuccess = result.IsSuccess;
@@ -22,10 +22,10 @@ public class Success
 
         // Assert
         Assert.Multiple(() =>
-        {
-            Assert.That(isSuccess, Is.True);
-            Assert.That(isFailure, Is.False);
-        });
+                        {
+                            Assert.That(isSuccess, Is.True);
+                            Assert.That(isFailure, Is.False);
+                        });
     }
 
 }

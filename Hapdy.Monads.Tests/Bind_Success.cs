@@ -10,8 +10,6 @@ namespace Hapdy.Monads.Results.Testing_Bind;
            , Category = "1 - Bind")]
 public class Bind_Success
 {
-    [SetUp] public void Setup() { }
-
     [Test]
     public void When_SuccessFunctionExpectsValue_Then_RunsSuccessFunction()
     {

@@ -103,13 +103,6 @@ public interface IResult<out T> : IResult
     /// Map a value to a result
     /// </summary>
     /// <param name="value">Value to be mapped</param>
-    /// <returns>Result of mapping</returns>
-    public static IResult<T> Map(T value) => IResult.Map(value);
-
-    /// <summary>
-    /// Map a value to a result
-    /// </summary>
-    /// <param name="value">Value to be mapped</param>
     /// <param name="func">Function to map value to result</param>
     /// <typeparam name="TValue">Type of value</typeparam>
     /// <returns>Result of mapping</returns>
