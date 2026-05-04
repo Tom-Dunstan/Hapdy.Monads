@@ -10,248 +10,205 @@ namespace Hapdy.Monads.Results.Testing_Bind;
            , Category = "1 - Bind")]
 public class Bind_ExceptionFailure
 {
-    [SetUp] public void Setup() { }
+    private static bool _functionWasCalled;
 
-    [Test]
-    public void When_SuccessFunctionExpectsValue_Then_DoesNotRunuccessFunction()
+    private static class Values
     {
-        // Arrange
-        const string testErrorMessage         = "Testing binding failure result.";
-        var          testException            = new Exception(testErrorMessage);
-        var          startingResult           = ExceptionFailure<int>.Create(testException);
-        var          successFunctionWasCalled = false;
+        public const           string    ExpectedStringValue = "Test exception message";
+        public static readonly Exception ExpectedException   = new(ExpectedStringValue);
 
-        // ReSharper disable once MoveLocalFunctionAfterJumpStatement
-        IResult<int> SuccessFunction(int value)
+        public static int? IntPassedToFunction;
+    }
+
+    private static class Errors
+    {
+        public const string Message = "Value must be greater than 30";
+    }
+
+    private static class Functions
+    {
+        public static Func<int, IResult<int>> GetFunction()
         {
-            successFunctionWasCalled = true;
-            return Success<int>.Create(value * 2);
+            return value =>
+                   {
+                       _functionWasCalled         = true;
+                       Values.IntPassedToFunction = value;
+                       IResult<int> result = value > 30
+                                                 ? Success<int>.Create(value * 2)
+                                                 : Failure<int>.Create(Errors.Message);
+                       return result;
+                   };
         }
 
-        // Act
-        var resultAfterBind = startingResult.Bind(SuccessFunction);
-
-        // Assert
-        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
-        using (Assert.EnterMultipleScope())
+        public static Func<int, CancellationToken, Task<IResult<int>>> GetAsyncFunction()
         {
-            Assert.That(successFunctionWasCalled, Is.False);
-            var exceptionFailureResult = (ExceptionFailure<int>)resultAfterBind;
-            Assert.That(exceptionFailureResult.Exception,    Is.EqualTo(testException));
-            Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
+            // ReSharper disable once RedundantLambdaParameterType
+            // ReSharper disable once UnusedParameter.Local
+            return (int value, CancellationToken cancellationToken) =>
+                   {
+                       _functionWasCalled         = true;
+                       Values.IntPassedToFunction = value;
+                       IResult<int> result = value > 30
+                                                 ? Success<int>.Create(value * 2)
+                                                 : Failure<int>.Create(Errors.Message);
+                       return Task.FromResult(result);
+                   };
+        }
+
+        public static Func<IResult<string>> GetNoParamFunction()
+        {
+            return () =>
+                   {
+                       _functionWasCalled = true;
+                       IResult<string> result = Success<string>.Create(Values.ExpectedStringValue);
+                       return result;
+                   };
+        }
+
+        public static Func<CancellationToken, Task<IResult<string>>> GetNoParamAsyncFunction()
+        {
+            // ReSharper disable once RedundantLambdaParameterType
+            // ReSharper disable once UnusedParameter.Local
+            return (CancellationToken cancellationToken) =>
+                   {
+                       _functionWasCalled = true;
+                       IResult<string> result = Success<string>.Create(Values.ExpectedStringValue);
+                       return Task.FromResult(result);
+                   };
         }
     }
 
-    [Test]
-    public async Task When_SuccessFunctionExpectsValue_Then_DoesNotRunuccessFunctionAsync()
+    private static class Assertions
     {
-        // Arrange
-        const string testErrorMessage         = "Testing binding failure result.";
-        var          testException            = new Exception(testErrorMessage);
-        var          startingResult           = ExceptionFailure<int>.Create(testException);
-        var          successFunctionWasCalled = false;
-
-        // ReSharper disable once MoveLocalFunctionAfterJumpStatement
-        Task<IResult<int>> SuccessFunction(int value, CancellationToken cancellationToken)
+        public static void ExceptionFailure<TReturn>(IResult<TReturn> result)
         {
-            successFunctionWasCalled = true;
-            return Task.FromResult((IResult<int>)Success<int>.Create(value * 2));
-        }
-
-        // Act
-        var resultAfterBind = await startingResult.Bind(SuccessFunction, CancellationToken.None);
-
-        // Assert
-        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(successFunctionWasCalled, Is.False);
-            var exceptionFailure = (ExceptionFailure<int>)resultAfterBind;
-            Assert.That(exceptionFailure.Exception,    Is.EqualTo(testException));
-            Assert.That(exceptionFailure.ErrorMessage, Is.EqualTo(testErrorMessage));
+            Assert.That(result, Is.InstanceOf<ExceptionFailure<TReturn>>());
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(_functionWasCalled,         Is.False);
+                Assert.That(Values.IntPassedToFunction, Is.Null);
+                var exceptionResult = (ExceptionFailure<TReturn>)result;
+                Assert.That(exceptionResult.Exception, Is.EqualTo(Values.ExpectedException));
+            }
         }
     }
 
+    private IResult<int>       _exceptionFailureResult;
+    private Task<IResult<int>> _asyncExceptionFailureResult;
+
+
+    [SetUp]
+    public void SetUp()
+    {
+        _functionWasCalled           = false;
+        Values.IntPassedToFunction   = null;
+        _exceptionFailureResult      = ExceptionFailure<int>.Create(Values.ExpectedException);
+        _asyncExceptionFailureResult = Task.FromResult(_exceptionFailureResult);
+    }
+
+    [TearDown] public void TearDown() { _asyncExceptionFailureResult.Dispose(); }
+
     [Test]
-    public async Task When_AsyncSuccessFunctionExpectsValue_Then_DoesNotRunuccessFunction()
+    public void When_SuccessFunctionExpectsValue_Then_DoesNotRunSuccessFunction()
     {
         // Arrange
-        const string testErrorMessage         = "Testing binding failure result.";
-        var          testException            = new Exception(testErrorMessage);
-        var          startingResult           = Task.FromResult((IResult<int>)ExceptionFailure<int>.Create(testException));
-        var          successFunctionWasCalled = false;
-
-        // ReSharper disable once MoveLocalFunctionAfterJumpStatement
-        IResult<int> SuccessFunction(int value)
-        {
-            successFunctionWasCalled = true;
-            return Success<int>.Create(value * 2);
-        }
+        var func = Functions.GetFunction();
 
         // Act
-        var resultAfterBind = await startingResult.Bind(SuccessFunction);
+        var result = _exceptionFailureResult.Bind(func);
 
         // Assert
-        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(successFunctionWasCalled, Is.False);
-            var exceptionFailureResult = (ExceptionFailure<int>)resultAfterBind;
-            Assert.That(exceptionFailureResult.Exception,    Is.EqualTo(testException));
-            Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
-        }
+        Assertions.ExceptionFailure(result);
     }
 
     [Test]
-    public async Task When_AsyncSuccessFunctionExpectsValue_Then_DoesNotRunuccessFunctionAsync()
+    public async Task When_SuccessFunctionExpectsValue_Then_DoesNotRunSuccessFunctionAsync()
     {
         // Arrange
-        const string testErrorMessage         = "Testing binding failure result.";
-        var          testException            = new Exception(testErrorMessage);
-        var          startingResult           = Task.FromResult((IResult<int>)ExceptionFailure<int>.Create(testException));
-        var          successFunctionWasCalled = false;
-
-        // ReSharper disable once MoveLocalFunctionAfterJumpStatement
-        Task<IResult<int>> SuccessFunction(int value, CancellationToken cancellationToken)
-        {
-            successFunctionWasCalled = true;
-            return Task.FromResult((IResult<int>)Success<int>.Create(value * 2));
-        }
+        var func = Functions.GetAsyncFunction();
 
         // Act
-        var resultAfterBind = await startingResult.Bind(SuccessFunction, CancellationToken.None);
+        var result = await _exceptionFailureResult.Bind(func, CancellationToken.None);
 
         // Assert
-        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(successFunctionWasCalled, Is.False);
-            var exceptionFailureResult = (ExceptionFailure<int>)resultAfterBind;
-            Assert.That(exceptionFailureResult.Exception,    Is.EqualTo(testException));
-            Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
-        }
+        Assertions.ExceptionFailure(result);
     }
 
     [Test]
-    public void When_SuccessFunctionExpectsNoValue_Then_DoesNotRunuccessFunction()
+    public async Task When_AsyncSuccessFunctionExpectsValue_Then_DoesNotRunSuccessFunction()
     {
         // Arrange
-        const string testErrorMessage         = "Testing binding failure result.";
-        var          testException            = new Exception(testErrorMessage);
-        var          startingResult           = ExceptionFailure<int>.Create(testException);
-        var          successFunctionWasCalled = false;
-
-        // ReSharper disable once MoveLocalFunctionAfterJumpStatement
-        IResult<int> SuccessFunction()
-        {
-            successFunctionWasCalled = true;
-            return Success<int>.Create(0);
-        }
+        var func = Functions.GetFunction();
 
         // Act
-        var resultAfterBind = startingResult.Bind(SuccessFunction);
+        var result = await _asyncExceptionFailureResult.Bind(func);
 
         // Assert
-        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(successFunctionWasCalled, Is.False);
-            var exceptionFailureResult = (ExceptionFailure<int>)resultAfterBind;
-            Assert.That(exceptionFailureResult.Exception,    Is.EqualTo(testException));
-            Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
-        }
+        Assertions.ExceptionFailure(result);
     }
 
     [Test]
-    public async Task When_SuccessFunctionExpectsNoValue_Then_DoesNotRunuccessFunctionAsync()
+    public async Task When_AsyncSuccessFunctionExpectsValue_Then_DoesNotRunSuccessFunctionAsync()
     {
         // Arrange
-        const string testErrorMessage         = "Testing binding failure result.";
-        var          testException            = new Exception(testErrorMessage);
-        var          startingResult           = ExceptionFailure<int>.Create(testException);
-        var          successFunctionWasCalled = false;
-
-        // ReSharper disable once MoveLocalFunctionAfterJumpStatement
-        Task<IResult<int>> SuccessFunction(CancellationToken cancellationToken)
-        {
-            successFunctionWasCalled = true;
-            return Task.FromResult((IResult<int>)Success<int>.Create(0));
-        }
+        var func = Functions.GetAsyncFunction();
 
         // Act
-        var resultAfterBind = await startingResult.Bind(SuccessFunction
-                                                      , CancellationToken.None);
+        var result = await _asyncExceptionFailureResult.Bind(func, CancellationToken.None);
 
         // Assert
-        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(successFunctionWasCalled, Is.False);
-            var exceptionFailureResult = (ExceptionFailure<int>)resultAfterBind;
-            Assert.That(exceptionFailureResult.Exception,    Is.EqualTo(testException));
-            Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
-        }
+        Assertions.ExceptionFailure(result);
     }
 
     [Test]
-    public async Task When_AsyncSuccessFunctionExpectsNoValue_Then_DoesNotRunuccessFunction()
+    public void When_SuccessFunctionExpectsNoValue_Then_DoesNotRunSuccessFunction()
     {
         // Arrange
-        const string testErrorMessage         = "Testing binding failure result.";
-        var          testException            = new Exception(testErrorMessage);
-        var          startingResult           = Task.FromResult((IResult<int>)ExceptionFailure<int>.Create(testException));
-        var          successFunctionWasCalled = false;
-
-        // ReSharper disable once MoveLocalFunctionAfterJumpStatement
-        IResult<int> SuccessFunction()
-        {
-            successFunctionWasCalled = true;
-            return Success<int>.Create(0);
-        }
+        var func = Functions.GetNoParamFunction();
 
         // Act
-        var resultAfterBind = await startingResult.Bind(SuccessFunction);
+        var result = _exceptionFailureResult.Bind(func);
 
         // Assert
-        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(successFunctionWasCalled, Is.False);
-            var exceptionFailureResult = (ExceptionFailure<int>)resultAfterBind;
-            Assert.That(exceptionFailureResult.Exception,    Is.EqualTo(testException));
-            Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
-        }
+        Assertions.ExceptionFailure(result);
     }
 
     [Test]
-    public async Task When_AsyncSuccessFunctionExpectsNoValue_Then_DoesNotRunuccessFunctionAsync()
+    public async Task When_SuccessFunctionExpectsNoValue_Then_DoesNotRunSuccessFunctionAsync()
     {
         // Arrange
-        const string testErrorMessage         = "Testing binding failure result.";
-        var          testException            = new Exception(testErrorMessage);
-        var          startingResult           = Task.FromResult((IResult<int>)ExceptionFailure<int>.Create(testException));
-        var          successFunctionWasCalled = false;
-
-        // ReSharper disable once MoveLocalFunctionAfterJumpStatement
-        Task<IResult<int>> SuccessFunction(CancellationToken cancellationToken)
-        {
-            successFunctionWasCalled = true;
-            return Task.FromResult((IResult<int>)Success<int>.Create(0));
-        }
+        var func = Functions.GetNoParamAsyncFunction();
 
         // Act
-        var resultAfterBind = await startingResult.Bind(SuccessFunction
-                                                      , CancellationToken.None);
+        var result = await _exceptionFailureResult.Bind(func, CancellationToken.None);
 
         // Assert
-        Assert.That(resultAfterBind, Is.InstanceOf<ExceptionFailure<int>>());
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(successFunctionWasCalled, Is.False);
-            var exceptionFailureResult = (ExceptionFailure<int>)resultAfterBind;
-            Assert.That(exceptionFailureResult.Exception,    Is.EqualTo(testException));
-            Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(testErrorMessage));
-        }
+        Assertions.ExceptionFailure(result);
     }
 
+    [Test]
+    public async Task When_AsyncSuccessFunctionExpectsNoValue_Then_DoesNotRunSuccessFunction()
+    {
+        // Arrange
+        var func = Functions.GetNoParamFunction();
+
+        // Act
+        var result = await _asyncExceptionFailureResult.Bind(func);
+
+        // Assert
+        Assertions.ExceptionFailure(result);
+    }
+
+    [Test]
+    public async Task When_AsyncSuccessFunctionExpectsNoValue_Then_DoesNotRunSuccessFunctionAsync()
+    {
+        // Arrange
+        var func = Functions.GetNoParamAsyncFunction();
+
+        // Act
+        var result = await _asyncExceptionFailureResult.Bind(func, CancellationToken.None);
+
+        // Assert
+        Assertions.ExceptionFailure(result);
+    }
 }
