@@ -4,140 +4,148 @@
 namespace Hapdy.Monads.Results.Testing_Map;
 
 [TestFixture(TestOf = typeof(IResult)
-           , TestName = "Map"
-           , Category = "4 - Map")]
+    , TestName = "Map"
+    , Category = "4 - Map")]
 [TestFixture]
 public class Map
 {
-    private bool _mapFunctionWasCalled;
+    private static bool _functionWasCalled;
 
-    private const    int  TestValue         = 42;
-    private readonly int? TestNullableValue = 42;
-    private readonly int? TestNullValue     = null;
-    private const    int  ExpectedValue     = 84;
-    
-    private const    string    ErrorMessage             = "Value must be greater than 30";
-    private const    string    ErrorMessageNullable     = "Value must be greater than 30";
-    private const    string    ExpectedExceptionMessage = "Test exception message";
-    private readonly Exception _exception               = new(ExpectedExceptionMessage);
-    
+    private static class Values
+    {
+        public const int Test = 42;
+        public static readonly int? TestNullable = 42;
+        public static readonly int? TestNull = null;
+        public const int Expected = 84;
+    }
+
+    private static class Errors
+    {
+        public const string Message = "Value must be greater than 30";
+        public const string MessageNullable = "Value must be greater than 30";
+        public const string ExpectedExceptionMessage = "Test exception message";
+        public static readonly Exception Exception = new(ExpectedExceptionMessage);
+    }
+
+    private static class Functions
+    {
+        public static Func<int, IResult<int>> GetFunction()
+        {
+            return value =>
+            {
+                _functionWasCalled = true;
+                return value > 30
+                    ? Success<int>.Create(value * 2)
+                    : Failure<int>.Create(Errors.Message);
+            };
+        }
+
+        public static Func<int, CancellationToken, Task<IResult<int>>> GetFunctionAsync()
+        {
+            // ReSharper disable once UnusedParameter.Local
+            return (value, cancellationToken) =>
+            {
+                _functionWasCalled = true;
+                IResult<int> result = value > 30
+                    ? Success<int>.Create(value * 2)
+                    : Failure<int>.Create(Errors.Message);
+                return Task.FromResult(result);
+            };
+        }
+
+        public static Func<int?, IResult<int>> GetNullableFunction()
+        {
+            return value =>
+            {
+                _functionWasCalled = true;
+                return value == null
+                    ? Failure<int>.Create(Errors.MessageNullable)
+                    : Success<int>.Create(value.Value * 2);
+            };
+        }
+
+        public static Func<int?, CancellationToken, Task<IResult<int>>> GetNullableFunctionAsync()
+        {
+            // ReSharper disable once RedundantLambdaParameterType
+            // ReSharper disable once UnusedParameter.Local
+            return (int? value, CancellationToken cancellationToken) =>
+            {
+                _functionWasCalled = true;
+                IResult<int> result = value == null
+                    ? Failure<int>.Create(Errors.MessageNullable)
+                    : Success<int>.Create(value.Value * 2);
+                return Task.FromResult(result);
+            };
+        }
+
+        public static Func<int, IResult<int>> GetExceptionFunction()
+        {
+            // ReSharper disable once UnusedParameter.Local
+            return value => throw Errors.Exception;
+        }
+
+        public static Func<int, CancellationToken, Task<IResult<int>>> GetExceptionFunctionAsync()
+        {
+            // ReSharper disable UnusedParameter.Local
+            return (value, cancellationToken) => throw Errors.Exception;
+            // ReSharper restore UnusedParameter.Local
+        }
+
+        public static Func<int?, IResult<int>> GetNullableExceptionFunction()
+        {
+            // ReSharper disable once UnusedParameter.Local
+            return value => throw Errors.Exception;
+        }
+
+        public static Func<int?, CancellationToken, Task<IResult<int>>> GetNullableExceptionFunctionAsync()
+        {
+            // ReSharper disable UnusedParameter.Local
+            return (value, cancellationToken) => throw Errors.Exception;
+            // ReSharper restore UnusedParameter.Local
+        }
+    }
+
+    private static class Assertions
+    {
+        public static void SuccessResult(IResult<int> result)
+        {
+            Assert.That(result, Is.InstanceOf<Success<int>>());
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(_functionWasCalled, Is.True);
+                var successResult = (Success<int>)result;
+                Assert.That(successResult.Value, Is.EqualTo(Values.Expected));
+            }
+        }
+
+        public static void FailureResult(IResult<int> result)
+        {
+            Assert.That(result, Is.InstanceOf<Failure<int>>());
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(_functionWasCalled, Is.True);
+                var failureResult = (Failure<int>)result;
+                Assert.That(failureResult.ErrorMessage, Is.EqualTo(Errors.MessageNullable));
+            }
+        }
+
+        public static void ExceptionFailureResult(IResult<int> result)
+        {
+            Assert.That(result, Is.InstanceOf<ExceptionFailure<int>>());
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(_functionWasCalled, Is.False);
+                var exceptionFailureResult = (ExceptionFailure<int>)result;
+                Assert.That(exceptionFailureResult.Exception, Is.EqualTo(Errors.Exception));
+                Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(Errors.ExpectedExceptionMessage));
+            }
+        }
+    }
+
     [SetUp]
     public void Setup()
     {
-        _mapFunctionWasCalled = false;
-    }
-    
-    private Func<int, IResult<int>> GetMappingFunction()
-    {
-        return value =>
-               {
-                   _mapFunctionWasCalled = true;
-                   _mapFunctionWasCalled = true;
-                   return value > 30
-                              ? Success<int>.Create(value * 2)
-                              : Failure<int>.Create(ErrorMessage);
-               };
-    }
-
-    private Func<int, CancellationToken, Task<IResult<int>>> GetMappingFunctionAsync()
-    {
-        // ReSharper disable once RedundantLambdaParameterType
-        // ReSharper disable once UnusedParameter.Local
-        return (int value, CancellationToken cancellationToken) =>
-               {
-                   _mapFunctionWasCalled = true;
-                   IResult<int> result = value > 30
-                                             ? Success<int>.Create(value * 2)
-                                             : Failure<int>.Create(ErrorMessage);
-                   return Task.FromResult(result);
-               };
-    }
-
-    private Func<int?, IResult<int>> GetNullableMappingFunction()
-    {
-        return value =>
-               {
-                   _mapFunctionWasCalled = true;
-                   return value == null 
-                              ? Failure<int>.Create(ErrorMessageNullable) 
-                              : Success<int>.Create(value.Value * 2);
-               };
-    }
-
-    private Func<int?, CancellationToken, Task<IResult<int>>> GetNullableMappingFunctionAsync()
-    {
-        // ReSharper disable once RedundantLambdaParameterType
-        // ReSharper disable once UnusedParameter.Local
-        return (int? value, CancellationToken cancellationToken) =>
-               {
-                   _mapFunctionWasCalled = true;
-                   IResult<int> result = value == null
-                                             ? Failure<int>.Create(ErrorMessageNullable)
-                                             : Success<int>.Create(value.Value * 2);
-                   return Task.FromResult(result);
-               };
-    }
-
-    private Func<int, IResult<int>> GetExceptionMappingFunction()
-    {
-        // ReSharper disable once UnusedParameter.Local
-        return value => throw _exception;
-    }
-
-    private Func<int, CancellationToken, Task<IResult<int>>> GetExceptionMappingFunctionAsync()
-    {
-        // ReSharper disable once RedundantLambdaParameterType
-        // ReSharper disable UnusedParameter.Local
-        return (int value, CancellationToken cancellationToken) => throw _exception;
-        // ReSharper restore UnusedParameter.Local
-    }
-
-    private Func<int?, IResult<int>> GetNullableExceptionMappingFunction()
-    {
-        // ReSharper disable once UnusedParameter.Local
-        return value => throw _exception;
-    }
-
-    private Func<int?, CancellationToken, Task<IResult<int>>> GetNullableExceptionMappingFunctionAsync()
-    {
-        // ReSharper disable once RedundantLambdaParameterType
-        // ReSharper disable UnusedParameter.Local
-        return (int? value, CancellationToken cancellationToken) => throw _exception;
-        // ReSharper restore UnusedParameter.Local
-    }
-
-    private void AssertSuccessResult(IResult<int> result)
-    {
-        Assert.That(result, Is.InstanceOf<Success<int>>());
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(_mapFunctionWasCalled, Is.True);
-            var successResult = (Success<int>)result;
-            Assert.That(successResult.Value, Is.EqualTo(ExpectedValue));
-        }
-    }
-    
-    private void AssertFailureResult(IResult<int> result)
-    {
-        Assert.That(result, Is.InstanceOf<Failure<int>>());
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(_mapFunctionWasCalled, Is.True);
-            var failureResult = (Failure<int>)result;
-            Assert.That(failureResult.ErrorMessage, Is.EqualTo(ErrorMessageNullable));
-        }
-    }
-
-    private void AssertExceptionFailureResult(IResult<int> result)
-    {
-        Assert.That(result, Is.InstanceOf<ExceptionFailure<int>>());
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(_mapFunctionWasCalled, Is.False);
-            var exceptionFailureResult = (ExceptionFailure<int>)result;
-            Assert.That(exceptionFailureResult.Exception,    Is.EqualTo(_exception));
-            Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(ExpectedExceptionMessage));
-        }
+        _functionWasCalled = false;
     }
 
     [Test]
@@ -145,10 +153,10 @@ public class Map
     {
         // Arrange
         const int testValue = 42;
-        
+
         // Act
         var result = IResult.Map(testValue);
-        
+
         // Assert
         Assert.That(result, Is.InstanceOf<Success<int>>());
         using (Assert.EnterMultipleScope())
@@ -157,133 +165,133 @@ public class Map
             Assert.That(successResult.Value, Is.EqualTo(testValue));
         }
     }
-    
+
     [Test]
     public void When_ValueWithFunction_Then_ReturnsMappedValue()
     {
         // Arrange
-        var mapFunction = GetMappingFunction();
+        var func = Functions.GetFunction();
 
         // Act
-        var result = IResult.Map(TestValue, mapFunction);
+        var result = IResult.Map(Values.Test, func);
 
         // Assert
-        AssertSuccessResult(result);
+        Assertions.SuccessResult(result);
     }
-    
+
     [Test]
     public async Task When_ValueWithAsyncFunction_Then_ReturnsMappedValue()
     {
         // Arrange
-        var mapFunction = GetMappingFunctionAsync();
+        var func = Functions.GetFunctionAsync();
 
         // Act
-        var result = await IResult.Map(TestValue, mapFunction, CancellationToken.None);
+        var result = await IResult.Map(Values.Test, func, CancellationToken.None);
 
         // Assert
-        AssertSuccessResult(result);
+        Assertions.SuccessResult(result);
     }
 
     [Test]
     public void When_NullableValueWithFunction_Then_ReturnsMappedValue()
     {
         // Arrange
-        var mapFunction = GetNullableMappingFunction();
+        var func = Functions.GetNullableFunction();
 
         // Act
-        var result = IResult<int>.Map(TestNullableValue, mapFunction);
+        var result = IResult<int>.Map(Values.TestNullable, func);
 
         // Assert
-        AssertSuccessResult(result);
+        Assertions.SuccessResult(result);
     }
-    
+
     [Test]
     public async Task When_NullableValueWithAsyncFunction_Then_ReturnsMappedValue()
     {
-        var mapFunction = GetNullableMappingFunctionAsync();
+        var func = Functions.GetNullableFunctionAsync();
 
         // Act
-        var result = await IResult<int>.Map(TestNullableValue, mapFunction, CancellationToken.None);
+        var result = await IResult<int>.Map(Values.TestNullable, func, CancellationToken.None);
 
         // Assert
-        AssertSuccessResult(result);
+        Assertions.SuccessResult(result);
     }
 
     [Test]
     public void When_InvalidNullValueWithFunction_Then_ReturnsFailedResult()
     {
         // Arrange
-        var mapFunction = GetNullableMappingFunction();
+        var func = Functions.GetNullableFunction();
 
         // Act
-        var result = IResult<int>.Map(TestNullValue, mapFunction);
+        var result = IResult<int>.Map(Values.TestNull, func);
 
         // Assert
-        AssertFailureResult(result);
+        Assertions.FailureResult(result);
     }
-    
+
     [Test]
     public async Task When_InvalidNullValueWithAsyncFunction_Then_ReturnsFailedResult()
     {
         // Arrange
-        var mapFunction = GetNullableMappingFunctionAsync();
+        var func = Functions.GetNullableFunctionAsync();
 
         // Act
-        var result = await IResult<int>.Map(TestNullValue, mapFunction, CancellationToken.None);
+        var result = await IResult<int>.Map(Values.TestNull, func, CancellationToken.None);
 
         // Assert
-        AssertFailureResult(result);
+        Assertions.FailureResult(result);
     }
 
     [Test]
     public void When_ValueWithFunctionThrowsException_Then_ReturnsExceptionFailure()
     {
         // Arrange
-        var mapFunction = GetExceptionMappingFunction();
+        var func = Functions.GetExceptionFunction();
 
         // Act
-        var result = IResult.Map(TestValue, mapFunction);
+        var result = IResult.Map(Values.Test, func);
 
         // Assert
-        AssertExceptionFailureResult(result);
+        Assertions.ExceptionFailureResult(result);
     }
-    
+
     [Test]
     public async Task When_ValueWithAsyncFunctionThrowsException_Then_ReturnsExceptionFailure()
     {
         // Arrange
-        var mapFunction  = GetExceptionMappingFunctionAsync();
+        var func = Functions.GetExceptionFunctionAsync();
 
         // Act
-        var result = await IResult.Map(TestValue, mapFunction, CancellationToken.None);
+        var result = await IResult.Map(Values.Test, func, CancellationToken.None);
 
         // Assert
-        AssertExceptionFailureResult(result);
+        Assertions.ExceptionFailureResult(result);
     }
 
     [Test]
     public void When_NullableValueWithFunctionThrowsException_Then_ReturnsExceptionFailure()
     {
         // Arrange
-        var mapFunction = GetNullableExceptionMappingFunction();
+        var func = Functions.GetNullableExceptionFunction();
 
         // Act
-        var result = IResult<int>.Map(TestValue, mapFunction);
+        var result = IResult<int>.Map(Values.Test, func);
 
         // Assert
-        AssertExceptionFailureResult(result);
+        Assertions.ExceptionFailureResult(result);
     }
-    
+
     [Test]
     public async Task When_NullableValueWithAsyncFunctionThrowsException_Then_ReturnsExceptionFailure()
     {
         // Arrange
-        var mapFunction  = GetNullableExceptionMappingFunctionAsync();
+        var func = Functions.GetNullableExceptionFunctionAsync();
 
         // Act
-        var result = await IResult<int>.Map(TestValue, mapFunction, CancellationToken.None);
+        var result = await IResult<int>.Map(Values.Test, func, CancellationToken.None);
 
         // Assert
-        AssertExceptionFailureResult(result);
+        Assertions.ExceptionFailureResult(result);
     }
 }
