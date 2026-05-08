@@ -6,24 +6,39 @@ using Hapdy.Monads.Results.Extensions;
 namespace Hapdy.Monads.Results.Testing_Tap;
 
 [TestFixture(TestOf = typeof(Success<>)
-           , TestName = "Success"
-           , Category = "3 - Tap")]
+    , TestName = "Success"
+    , Category = "3 - Tap")]
 public class Tap_Success
 {
+    [SetUp]
+    public void SetUp()
+    {
+        _functionWasCalled = false;
+        Values.IntPassedToFunction = null;
+        _successResult = Success<int>.Create(Values.Test);
+        _asyncSuccessResult = Task.FromResult(_successResult);
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _asyncSuccessResult.Dispose();
+    }
+
     private static bool _functionWasCalled;
 
     private static class Values
     {
-        public const           int    Test                = 42;
-        public static readonly int?   ExpectedValue       = 42;
+        public const int Test = 42;
+        public static readonly int? ExpectedValue = 42;
 
         public static int? IntPassedToFunction;
     }
 
     private static class Errors
     {
-        public const           string    ExpectedExceptionMessage = "Test exception message";
-        public static readonly Exception ExceptionThrown          = new(ExpectedExceptionMessage);
+        public const string ExpectedExceptionMessage = "Test exception message";
+        public static readonly Exception ExceptionThrown = new(ExpectedExceptionMessage);
     }
 
     private static class Functions
@@ -31,64 +46,54 @@ public class Tap_Success
         public static Action<int> GetAction()
         {
             return value =>
-                   {
-                       _functionWasCalled         = true;
-                       Values.IntPassedToFunction = value;
-                   };
+            {
+                _functionWasCalled = true;
+                Values.IntPassedToFunction = value;
+            };
         }
 
         public static Func<int, CancellationToken, Task> GetAsyncAction()
         {
-            // ReSharper disable once RedundantLambdaParameterType
-            // ReSharper disable once UnusedParameter.Local
-            return (int value, CancellationToken cancellationToken) =>
-                   {
-                       _functionWasCalled         = true;
-                       Values.IntPassedToFunction = value;
-                       return Task.CompletedTask;
-                   };
+            return (value, _) =>
+            {
+                _functionWasCalled = true;
+                Values.IntPassedToFunction = value;
+                return Task.CompletedTask;
+            };
         }
 
         public static Action GetNoParamAction()
         {
-            return () =>
-                   {
-                       _functionWasCalled = true;
-                   };
+            return () => { _functionWasCalled = true; };
         }
 
         public static Func<CancellationToken, Task> GetNoParamAsyncAction()
         {
-            // ReSharper disable once RedundantLambdaParameterType
-            // ReSharper disable once UnusedParameter.Local
-            return (CancellationToken cancellationToken) =>
-                   {
-                       _functionWasCalled = true;
-                       return Task.CompletedTask;
-                   };
+            return _ =>
+            {
+                _functionWasCalled = true;
+                return Task.CompletedTask;
+            };
         }
 
         public static Action<int> GetExceptionAction()
         {
-            // ReSharper disable UnusedParameter.Local
-            return value => throw Errors.ExceptionThrown;
-            // ReSharper restore UnusedParameter.Local
+            return _ => throw Errors.ExceptionThrown;
         }
 
         public static Func<int, CancellationToken, Task> GetExceptionAsyncAction()
         {
-            // ReSharper disable UnusedParameter.Local
-            return (value, cancellationToken) => throw Errors.ExceptionThrown;
-            // ReSharper restore UnusedParameter.Local
+            return (_, _) => throw Errors.ExceptionThrown;
         }
 
-        public static Action GetNoParamExceptionAction() { return () => throw Errors.ExceptionThrown; }
+        public static Action GetNoParamExceptionAction()
+        {
+            return () => throw Errors.ExceptionThrown;
+        }
 
         public static Func<CancellationToken, Task> GetNoParamExceptionAsyncAction()
         {
-            // ReSharper disable UnusedParameter.Local
-            return cancellationToken => throw Errors.ExceptionThrown;
-            // ReSharper restore UnusedParameter.Local
+            return _ => throw Errors.ExceptionThrown;
         }
     }
 
@@ -96,16 +101,16 @@ public class Tap_Success
     {
         public static void Successful(
             IResult<int> result
-          , IResult<int> originalResult
-          , int?         valuePassed
-          , int?         expectedValuePassedToFunction)
+            , IResult<int> originalResult
+            , int? valuePassed
+            , int? expectedValuePassedToFunction)
         {
             Assert.That(result, Is.InstanceOf<Success<int>>());
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(_functionWasCalled, Is.True);
-                Assert.That(valuePassed,        Is.EqualTo(expectedValuePassedToFunction));
-                Assert.That(result,             Is.EqualTo(originalResult));
+                Assert.That(valuePassed, Is.EqualTo(expectedValuePassedToFunction));
+                Assert.That(result, Is.EqualTo(originalResult));
             }
         }
 
@@ -115,27 +120,15 @@ public class Tap_Success
             using (Assert.EnterMultipleScope())
             {
                 var exceptionFailure = (ExceptionFailure<int>)result;
-                Assert.That(Values.IntPassedToFunction,         Is.Null);
-                Assert.That(exceptionFailure.Exception,         Is.EqualTo(Errors.ExceptionThrown));
+                Assert.That(Values.IntPassedToFunction, Is.Null);
+                Assert.That(exceptionFailure.Exception, Is.EqualTo(Errors.ExceptionThrown));
                 Assert.That(exceptionFailure.Exception.Message, Is.EqualTo(Errors.ExpectedExceptionMessage));
             }
         }
     }
 
-    private IResult<int>       _successResult;
+    private IResult<int> _successResult;
     private Task<IResult<int>> _asyncSuccessResult;
-
-
-    [SetUp]
-    public void SetUp()
-    {
-        _functionWasCalled            = false;
-        Values.IntPassedToFunction    = null;
-        _successResult                = Success<int>.Create(Values.Test);
-        _asyncSuccessResult           = Task.FromResult(_successResult);
-    }
-
-    [TearDown] public void TearDown() { _asyncSuccessResult.Dispose(); }
 
     [Test]
     public void When_SuccessFunctionExpectsValue_Then_RunsSuccessFunction()
@@ -148,9 +141,9 @@ public class Tap_Success
 
         // Assert
         Assertions.Successful(result
-                                      , _successResult
-                                      , Values.IntPassedToFunction
-                                      , Values.ExpectedValue);
+            , _successResult
+            , Values.IntPassedToFunction
+            , Values.ExpectedValue);
     }
 
     [Test]
@@ -164,9 +157,9 @@ public class Tap_Success
 
         // Assert
         Assertions.Successful(result
-                                      , _successResult
-                                      , Values.IntPassedToFunction
-                                      , Values.ExpectedValue);
+            , _successResult
+            , Values.IntPassedToFunction
+            , Values.ExpectedValue);
     }
 
     [Test]
@@ -180,9 +173,9 @@ public class Tap_Success
 
         // Assert
         Assertions.Successful(result
-                                      , _successResult
-                                      , Values.IntPassedToFunction
-                                      , Values.ExpectedValue);
+            , _successResult
+            , Values.IntPassedToFunction
+            , Values.ExpectedValue);
     }
 
     [Test]
@@ -196,9 +189,9 @@ public class Tap_Success
 
         // Assert
         Assertions.Successful(result
-                                      , _successResult
-                                      , Values.IntPassedToFunction
-                                      , Values.ExpectedValue);
+            , _successResult
+            , Values.IntPassedToFunction
+            , Values.ExpectedValue);
     }
 
     [Test]
@@ -212,9 +205,9 @@ public class Tap_Success
 
         // Assert
         Assertions.Successful(result
-                                      , _successResult
-                                      , Values.IntPassedToFunction
-                                      , null);
+            , _successResult
+            , Values.IntPassedToFunction
+            , null);
     }
 
     [Test]
@@ -228,9 +221,9 @@ public class Tap_Success
 
         // Assert
         Assertions.Successful(result
-                                      , _successResult
-                                      , Values.IntPassedToFunction
-                                      , null);
+            , _successResult
+            , Values.IntPassedToFunction
+            , null);
     }
 
     [Test]
@@ -244,9 +237,9 @@ public class Tap_Success
 
         // Assert
         Assertions.Successful(result
-                                      , _successResult
-                                      , Values.IntPassedToFunction
-                                      , null);
+            , _successResult
+            , Values.IntPassedToFunction
+            , null);
     }
 
     [Test]
@@ -260,9 +253,9 @@ public class Tap_Success
 
         // Assert
         Assertions.Successful(result
-                                      , _successResult
-                                      , Values.IntPassedToFunction
-                                      , null);
+            , _successResult
+            , Values.IntPassedToFunction
+            , null);
     }
 
     [Test]
@@ -298,7 +291,7 @@ public class Tap_Success
         var func = Functions.GetExceptionAsyncAction();
 
         //Act
-        var result =await  _asyncSuccessResult.Tap(func, CancellationToken.None);
+        var result = await _asyncSuccessResult.Tap(func, CancellationToken.None);
 
         // Assert
         Assertions.ExceptionThrown(result);
@@ -311,7 +304,7 @@ public class Tap_Success
         var func = Functions.GetExceptionAsyncAction();
 
         //Act
-        var result =await  _successResult.Tap(func, CancellationToken.None);
+        var result = await _successResult.Tap(func, CancellationToken.None);
 
         // Assert
         Assertions.ExceptionThrown(result);
@@ -324,7 +317,7 @@ public class Tap_Success
         var func = Functions.GetNoParamExceptionAction();
 
         //Act
-        var result =  _successResult.Tap(func);
+        var result = _successResult.Tap(func);
 
         // Assert
         Assertions.ExceptionThrown(result);

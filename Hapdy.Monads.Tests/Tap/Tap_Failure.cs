@@ -6,10 +6,25 @@ using Hapdy.Monads.Results.Extensions;
 namespace Hapdy.Monads.Results.Testing_Tap;
 
 [TestFixture(TestOf = typeof(Failure<>)
-           , TestName = "Failure"
-           , Category = "3 - Tap")]
+    , TestName = "Failure"
+    , Category = "3 - Tap")]
 public class Tap_Failure
 {
+    [SetUp]
+    public void SetUp()
+    {
+        _functionWasCalled = false;
+        Values.IntPassedToAction = null;
+        _failureResult = Failure<int>.Create(Values.ExpectedValue);
+        _asyncFailureResult = Task.FromResult(_failureResult);
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _asyncFailureResult.Dispose();
+    }
+
     private static bool _functionWasCalled;
 
     private static class Values
@@ -24,41 +39,34 @@ public class Tap_Failure
         public static Action<int> GetAction()
         {
             return value =>
-                   {
-                       _functionWasCalled         = true;
-                       Values.IntPassedToAction = value;
-                   };
+            {
+                _functionWasCalled = true;
+                Values.IntPassedToAction = value;
+            };
         }
 
         public static Func<int, CancellationToken, Task> GetAsyncAction()
         {
-            // ReSharper disable once RedundantLambdaParameterType
-            // ReSharper disable once UnusedParameter.Local
-            return (int value, CancellationToken cancellationToken) =>
-                   {
-                       _functionWasCalled         = true;
-                       Values.IntPassedToAction = value;
-                       return Task.CompletedTask;
-                   };
+            return (value, _) =>
+            {
+                _functionWasCalled = true;
+                Values.IntPassedToAction = value;
+                return Task.CompletedTask;
+            };
         }
 
         public static Action GetNoParamAction()
         {
-            return () =>
-                   {
-                       _functionWasCalled = true;
-                   };
+            return () => { _functionWasCalled = true; };
         }
 
         public static Func<CancellationToken, Task> GetNoParamAsyncAction()
         {
-            // ReSharper disable once RedundantLambdaParameterType
-            // ReSharper disable once UnusedParameter.Local
-            return (CancellationToken cancellationToken) =>
-                   {
-                       _functionWasCalled = true;
-                       return Task.CompletedTask;
-                   };
+            return _ =>
+            {
+                _functionWasCalled = true;
+                return Task.CompletedTask;
+            };
         }
     }
 
@@ -66,32 +74,20 @@ public class Tap_Failure
     {
         public static void Failure(
             IResult<int> result
-          , IResult<int> originalResult)
+            , IResult<int> originalResult)
         {
             Assert.That(result, Is.InstanceOf<Failure<int>>());
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(_functionWasCalled,         Is.False);
+                Assert.That(_functionWasCalled, Is.False);
                 Assert.That(Values.IntPassedToAction, Is.Null);
-                Assert.That(result,                     Is.EqualTo(originalResult));
+                Assert.That(result, Is.EqualTo(originalResult));
             }
         }
     }
 
-    private IResult<int>       _failureResult;
+    private IResult<int> _failureResult;
     private Task<IResult<int>> _asyncFailureResult;
-
-
-    [SetUp]
-    public void SetUp()
-    {
-        _functionWasCalled         = false;
-        Values.IntPassedToAction = null;
-        _failureResult             = Failure<int>.Create(Values.ExpectedValue);
-        _asyncFailureResult        = Task.FromResult(_failureResult);
-    }
-
-    [TearDown] public void TearDown() { _asyncFailureResult.Dispose(); }
 
     [Test]
     public void When_SuccessFunctionExpectsValue_Then_DoesNotRunSuccessFunction()

@@ -21,7 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Hapdy.Monads\Hapdy.Monads.csproj" />
+        <ProjectReference Include="..\Hapdy.Monads\Hapdy.Monads.csproj"/>
     </ItemGroup>
 
 </Project>

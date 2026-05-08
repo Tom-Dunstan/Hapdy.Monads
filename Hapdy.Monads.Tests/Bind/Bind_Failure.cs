@@ -6,72 +6,32 @@ using Hapdy.Monads.Results.Extensions;
 namespace Hapdy.Monads.Results.Testing_Bind;
 
 [TestFixture(TestOf = typeof(Failure<>)
-           , TestName = "Failure"
-           , Category = "1 - Bind")]
+    , TestName = "Failure"
+    , Category = "1 - Bind")]
 public class Bind_Failure
 {
-    private static bool _functionWasCalled;
-
-    private static class Values
+    [SetUp]
+    public void Setup()
     {
-        public const string ExpectedErrorMessage = "Testing failure result.";
-        public const string ExpectedStringValue  = "Expected String Value";
+        Values.Initialise();
+        Results.FailureResult = Failure<int>.Create(Errors.ExpectedExceptionMessage);
+        Results.AsyncFailureResult = Task.FromResult(Results.FailureResult);
     }
 
-    private static class Errors
+    [TearDown]
+    public void TearDown()
     {
-        public const string Message = "Value must be greater than 30";
+        Results.AsyncFailureResult.Dispose();
     }
 
-    private static class Functions
+    private static class Results
     {
-        public static Func<int, IResult<int>> GetFunction()
-        {
-            return value =>
-                   {
-                       _functionWasCalled = true;
-                       IResult<int> result = value > 30
-                                                 ? Success<int>.Create(value * 2)
-                                                 : Failure<int>.Create(Errors.Message);
-                       return result;
-                   };
-        }
-
-        public static Func<int, CancellationToken, Task<IResult<int>>> GetAsyncFunction()
-        {
-            // ReSharper disable once RedundantLambdaParameterType
-            // ReSharper disable once UnusedParameter.Local
-            return (int value, CancellationToken cancellationToken) =>
-                   {
-                       _functionWasCalled = true;
-                       IResult<int> result = value > 30
-                                                 ? Success<int>.Create(value * 2)
-                                                 : Failure<int>.Create(Errors.Message);
-                       return Task.FromResult(result);
-                   };
-        }
-
-        public static Func<IResult<string>> GetNoParamFunction()
-        {
-            return () =>
-                   {
-                       _functionWasCalled = true;
-                       IResult<string> result = Success<string>.Create(Values.ExpectedStringValue);
-                       return result;
-                   };
-        }
-
-        public static Func<CancellationToken, Task<IResult<string>>> GetNoParamAsyncFunction()
-        {
-            // ReSharper disable once RedundantLambdaParameterType
-            // ReSharper disable once UnusedParameter.Local
-            return (CancellationToken cancellationToken) =>
-                   {
-                       _functionWasCalled = true;
-                       IResult<string> result = Success<string>.Create(Values.ExpectedStringValue);
-                       return Task.FromResult(result);
-                   };
-        }
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value
+        public static IResult<int> FailureResult;
+        public static Task<IResult<int>> AsyncFailureResult;
+#pragma warning restore CS0649 // Field is never assigned to, and will always have its default value
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     }
 
     private static class Assertions
@@ -81,26 +41,12 @@ public class Bind_Failure
             Assert.That(result, Is.InstanceOf<Failure<TReturn>>());
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(_functionWasCalled, Is.False);
+                Assert.That(Values.FunctionWasCalled, Is.False);
                 var failureResult = (Failure<TReturn>)result;
-                Assert.That(failureResult.ErrorMessage, Is.EqualTo(Values.ExpectedErrorMessage));
+                Assert.That(failureResult.ErrorMessage, Is.EqualTo(Errors.ExpectedExceptionMessage));
             }
         }
     }
-
-    private IResult<int>       _failureResult;
-    private Task<IResult<int>> _asyncFailureResult;
-
-
-    [SetUp]
-    public void Setup()
-    {
-        _functionWasCalled  = false;
-        _failureResult      = Failure<int>.Create(Values.ExpectedErrorMessage);
-        _asyncFailureResult = Task.FromResult(_failureResult);
-    }
-
-    [TearDown] public void TearDown() { _asyncFailureResult.Dispose(); }
 
     [Test]
     public void When_FailureAndSuccessExpectsValue_Then_DoesNotRunSuccessFunction()
@@ -109,7 +55,7 @@ public class Bind_Failure
         var func = Functions.GetFunction();
 
         // Act
-        var result = _failureResult.Bind(func);
+        var result = Results.FailureResult.Bind(func);
 
         // Assert
         Assertions.Failed(result);
@@ -122,7 +68,7 @@ public class Bind_Failure
         var func = Functions.GetAsyncFunction();
 
         // Act
-        var result = await _failureResult.Bind(func, CancellationToken.None);
+        var result = await Results.FailureResult.Bind(func, CancellationToken.None);
 
         // Assert
         Assertions.Failed(result);
@@ -135,7 +81,7 @@ public class Bind_Failure
         var func = Functions.GetFunction();
 
         // Act
-        var result = await _asyncFailureResult.Bind(func);
+        var result = await Results.AsyncFailureResult.Bind(func);
 
         // Assert
         Assertions.Failed(result);
@@ -148,7 +94,7 @@ public class Bind_Failure
         var func = Functions.GetAsyncFunction();
 
         // Act
-        var result = await _asyncFailureResult.Bind(func, CancellationToken.None);
+        var result = await Results.AsyncFailureResult.Bind(func, CancellationToken.None);
 
         // Assert
         Assertions.Failed(result);
@@ -161,7 +107,7 @@ public class Bind_Failure
         var func = Functions.GetNoParamFunction();
 
         // Act
-        var result = _failureResult.Bind(func);
+        var result = Results.FailureResult.Bind(func);
 
         // Assert
         Assertions.Failed(result);
@@ -174,7 +120,7 @@ public class Bind_Failure
         var func = Functions.GetNoParamAsyncFunction();
 
         // Act
-        var result = await _failureResult.Bind(func, CancellationToken.None);
+        var result = await Results.FailureResult.Bind(func, CancellationToken.None);
 
         // Assert
         Assertions.Failed(result);
@@ -187,7 +133,7 @@ public class Bind_Failure
         var func = Functions.GetNoParamFunction();
 
         // Act
-        var result = await _asyncFailureResult.Bind(func);
+        var result = await Results.AsyncFailureResult.Bind(func);
 
         // Assert
         Assertions.Failed(result);
@@ -200,7 +146,7 @@ public class Bind_Failure
         var func = Functions.GetNoParamAsyncFunction();
 
         // Act
-        var result = await _asyncFailureResult.Bind(func, CancellationToken.None);
+        var result = await Results.AsyncFailureResult.Bind(func, CancellationToken.None);
 
         // Assert
         Assertions.Failed(result);

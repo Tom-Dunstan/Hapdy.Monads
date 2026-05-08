@@ -4,107 +4,99 @@
 namespace Hapdy.Monads.Results.Testing_Validate;
 
 [TestFixture(TestOf = typeof(IResult)
-           , TestName = "Validate"
-           , Category = "5 - Validate")]
+    , TestName = "Validate"
+    , Category = "5 - Validate")]
 [TestFixture]
 public class Validate
 {
+    [SetUp]
+    public void Setup()
+    {
+        _functionWasCalled = false;
+    }
+
     private static bool _functionWasCalled;
 
     private static class Values
     {
-        public const           int  TestValue         = 42;
+        public const int TestValue = 42;
+        public const int ExpectedValue = 84;
+
+        public const string ErrorMessage = "Value must be greater than 30";
+        public const string ErrorMessageNullable = "Value must be greater than 30";
+        public const string ExpectedExceptionMessage = "Test exception message";
         public static readonly int? TestNullableValue = 42;
-        public static readonly int? TestNullValue     = null;
-        public const           int  ExpectedValue     = 84;
-
-        public const           string    ErrorMessage             = "Value must be greater than 30";
-        public const           string    ErrorMessageNullable     = "Value must be greater than 30";
-        public const           string    ExpectedExceptionMessage = "Test exception message";
-        public static readonly Exception Exception                = new(ExpectedExceptionMessage);
+        public static readonly int? TestNullValue = null;
+        public static readonly Exception Exception = new(ExpectedExceptionMessage);
     }
-
-    [SetUp] public void Setup() { _functionWasCalled = false; }
 
     private static class Functions
     {
         public static Func<int, IResult<int>> GetFunction()
         {
             return value =>
-                   {
-                       _functionWasCalled = true;
-                       _functionWasCalled = true;
-                       return value > 30
-                                  ? Success<int>.Create(value * 2)
-                                  : Failure<int>.Create(Values.ErrorMessage);
-                   };
+            {
+                _functionWasCalled = true;
+                _functionWasCalled = true;
+                return value > 30
+                    ? Success<int>.Create(value * 2)
+                    : Failure<int>.Create(Values.ErrorMessage);
+            };
         }
 
         public static Func<int, CancellationToken, Task<IResult<int>>> GetFunctionAsync()
         {
-            // ReSharper disable once RedundantLambdaParameterType
-            // ReSharper disable once UnusedParameter.Local
-            return (int value, CancellationToken cancellationToken) =>
-                   {
-                       _functionWasCalled = true;
-                       IResult<int> result = value > 30
-                                                 ? Success<int>.Create(value * 2)
-                                                 : Failure<int>.Create(Values.ErrorMessage);
-                       return Task.FromResult(result);
-                   };
+            return (value, _) =>
+            {
+                _functionWasCalled = true;
+                IResult<int> result = value > 30
+                    ? Success<int>.Create(value * 2)
+                    : Failure<int>.Create(Values.ErrorMessage);
+                return Task.FromResult(result);
+            };
         }
 
         public static Func<int?, IResult<int>> GetNullableFunction()
         {
             return value =>
-                   {
-                       _functionWasCalled = true;
-                       return value == null
-                                  ? Failure<int>.Create(Values.ErrorMessageNullable)
-                                  : Success<int>.Create(value.Value * 2);
-                   };
+            {
+                _functionWasCalled = true;
+                return value == null
+                    ? Failure<int>.Create(Values.ErrorMessageNullable)
+                    : Success<int>.Create(value.Value * 2);
+            };
         }
 
         public static Func<int?, CancellationToken, Task<IResult<int>>> GetNullableFunctionAsync()
         {
-            // ReSharper disable once RedundantLambdaParameterType
-            // ReSharper disable once UnusedParameter.Local
-            return (int? value, CancellationToken cancellationToken) =>
-                   {
-                       _functionWasCalled = true;
-                       IResult<int> result = value == null
-                                                 ? Failure<int>.Create(Values.ErrorMessageNullable)
-                                                 : Success<int>.Create(value.Value * 2);
-                       return Task.FromResult(result);
-                   };
+            return (value, _) =>
+            {
+                _functionWasCalled = true;
+                IResult<int> result = value == null
+                    ? Failure<int>.Create(Values.ErrorMessageNullable)
+                    : Success<int>.Create(value.Value * 2);
+                return Task.FromResult(result);
+            };
         }
 
         public static Func<int, IResult<int>> GetExceptionFunction()
         {
-            // ReSharper disable once UnusedParameter.Local
-            return value => throw Values.Exception;
+            return _ => throw Values.Exception;
         }
 
         public static Func<int, CancellationToken, Task<IResult<int>>> GetExceptionFunctionAsync()
         {
-            // ReSharper disable once RedundantLambdaParameterType
-            // ReSharper disable UnusedParameter.Local
-            return (int value, CancellationToken cancellationToken) => throw Values.Exception;
-            // ReSharper restore UnusedParameter.Local
+            return (_, _) => throw Values.Exception;
         }
 
         public static Func<int?, IResult<int>> GetNullableExceptionFunction()
         {
-            // ReSharper disable once UnusedParameter.Local
-            return value => throw Values.Exception;
+            return _ => throw Values.Exception;
         }
 
         public static Func<int?, CancellationToken, Task<IResult<int>>> GetNullableExceptionFunctionAsync()
         {
-            // ReSharper disable once RedundantLambdaParameterType
-            // ReSharper disable UnusedParameter.Local
-            return (int? value, CancellationToken cancellationToken) => throw Values.Exception;
-            // ReSharper restore UnusedParameter.Local
+            return (_, _) => throw Values.Exception;
         }
     }
 
@@ -139,7 +131,7 @@ public class Validate
             {
                 Assert.That(_functionWasCalled, Is.False);
                 var exceptionFailureResult = (ExceptionFailure<int>)result;
-                Assert.That(exceptionFailureResult.Exception,    Is.EqualTo(Values.Exception));
+                Assert.That(exceptionFailureResult.Exception, Is.EqualTo(Values.Exception));
                 Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(Values.ExpectedExceptionMessage));
             }
         }
@@ -166,8 +158,8 @@ public class Validate
 
         // Act
         var result = await IResult.Validate(Values.TestValue
-                                          , mapFunction
-                                          , CancellationToken.None);
+            , mapFunction
+            , CancellationToken.None);
 
         // Assert
         Assertions.AssertSuccessResult(result);
@@ -193,8 +185,8 @@ public class Validate
 
         // Act
         var result = await IResult<int>.Validate(Values.TestNullableValue
-                                               , mapFunction
-                                               , CancellationToken.None);
+            , mapFunction
+            , CancellationToken.None);
 
         // Assert
         Assertions.AssertSuccessResult(result);
@@ -221,8 +213,8 @@ public class Validate
 
         // Act
         var result = await IResult<int>.Validate(Values.TestNullValue
-                                               , mapFunction
-                                               , CancellationToken.None);
+            , mapFunction
+            , CancellationToken.None);
 
         // Assert
         Assertions.AssertFailureResult(result);
@@ -249,8 +241,8 @@ public class Validate
 
         // Act
         var result = await IResult.Validate(Values.TestValue
-                                          , mapFunction
-                                          , CancellationToken.None);
+            , mapFunction
+            , CancellationToken.None);
 
         // Assert
         Assertions.AssertExceptionFailureResult(result);
@@ -277,8 +269,8 @@ public class Validate
 
         // Act
         var result = await IResult<int>.Validate(Values.TestValue
-                                               , mapFunction
-                                               , CancellationToken.None);
+            , mapFunction
+            , CancellationToken.None);
 
         // Assert
         Assertions.AssertExceptionFailureResult(result);

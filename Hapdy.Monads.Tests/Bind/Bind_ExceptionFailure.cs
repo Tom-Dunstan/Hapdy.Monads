@@ -6,76 +6,32 @@ using Hapdy.Monads.Results.Extensions;
 namespace Hapdy.Monads.Results.Testing_Bind;
 
 [TestFixture(TestOf = typeof(Failure<>)
-           , TestName = "ExceptionFailure"
-           , Category = "1 - Bind")]
+    , TestName = "ExceptionFailure"
+    , Category = "1 - Bind")]
 public class Bind_ExceptionFailure
 {
-    private static bool _functionWasCalled;
-
-    private static class Values
+    [SetUp]
+    public void SetUp()
     {
-        public const           string    ExpectedStringValue = "Test exception message";
-        public static readonly Exception ExpectedException   = new(ExpectedStringValue);
-
-        public static int? IntPassedToFunction;
+        Values.Initialise();
+        Results.ExceptionFailureResult = ExceptionFailure<int>.Create(Errors.ExceptionThrown);
+        Results.AsyncExceptionFailureResult = Task.FromResult(Results.ExceptionFailureResult);
     }
 
-    private static class Errors
+    [TearDown]
+    public void TearDown()
     {
-        public const string Message = "Value must be greater than 30";
+        Results.AsyncExceptionFailureResult.Dispose();
     }
 
-    private static class Functions
+    private static class Results
     {
-        public static Func<int, IResult<int>> GetFunction()
-        {
-            return value =>
-                   {
-                       _functionWasCalled         = true;
-                       Values.IntPassedToFunction = value;
-                       IResult<int> result = value > 30
-                                                 ? Success<int>.Create(value * 2)
-                                                 : Failure<int>.Create(Errors.Message);
-                       return result;
-                   };
-        }
-
-        public static Func<int, CancellationToken, Task<IResult<int>>> GetAsyncFunction()
-        {
-            // ReSharper disable once RedundantLambdaParameterType
-            // ReSharper disable once UnusedParameter.Local
-            return (int value, CancellationToken cancellationToken) =>
-                   {
-                       _functionWasCalled         = true;
-                       Values.IntPassedToFunction = value;
-                       IResult<int> result = value > 30
-                                                 ? Success<int>.Create(value * 2)
-                                                 : Failure<int>.Create(Errors.Message);
-                       return Task.FromResult(result);
-                   };
-        }
-
-        public static Func<IResult<string>> GetNoParamFunction()
-        {
-            return () =>
-                   {
-                       _functionWasCalled = true;
-                       IResult<string> result = Success<string>.Create(Values.ExpectedStringValue);
-                       return result;
-                   };
-        }
-
-        public static Func<CancellationToken, Task<IResult<string>>> GetNoParamAsyncFunction()
-        {
-            // ReSharper disable once RedundantLambdaParameterType
-            // ReSharper disable once UnusedParameter.Local
-            return (CancellationToken cancellationToken) =>
-                   {
-                       _functionWasCalled = true;
-                       IResult<string> result = Success<string>.Create(Values.ExpectedStringValue);
-                       return Task.FromResult(result);
-                   };
-        }
+#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        public static IResult<int> ExceptionFailureResult;
+        public static Task<IResult<int>> AsyncExceptionFailureResult;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+#pragma warning restore CS0649 // Field is never assigned to, and will always have its default value
     }
 
     private static class Assertions
@@ -85,28 +41,13 @@ public class Bind_ExceptionFailure
             Assert.That(result, Is.InstanceOf<ExceptionFailure<TReturn>>());
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(_functionWasCalled,         Is.False);
+                Assert.That(Values.FunctionWasCalled, Is.False);
                 Assert.That(Values.IntPassedToFunction, Is.Null);
                 var exceptionResult = (ExceptionFailure<TReturn>)result;
-                Assert.That(exceptionResult.Exception, Is.EqualTo(Values.ExpectedException));
+                Assert.That(exceptionResult.Exception, Is.EqualTo(Errors.ExceptionThrown));
             }
         }
     }
-
-    private IResult<int>       _exceptionFailureResult;
-    private Task<IResult<int>> _asyncExceptionFailureResult;
-
-
-    [SetUp]
-    public void SetUp()
-    {
-        _functionWasCalled           = false;
-        Values.IntPassedToFunction   = null;
-        _exceptionFailureResult      = ExceptionFailure<int>.Create(Values.ExpectedException);
-        _asyncExceptionFailureResult = Task.FromResult(_exceptionFailureResult);
-    }
-
-    [TearDown] public void TearDown() { _asyncExceptionFailureResult.Dispose(); }
 
     [Test]
     public void When_SuccessFunctionExpectsValue_Then_DoesNotRunSuccessFunction()
@@ -115,7 +56,7 @@ public class Bind_ExceptionFailure
         var func = Functions.GetFunction();
 
         // Act
-        var result = _exceptionFailureResult.Bind(func);
+        var result = Results.ExceptionFailureResult.Bind(func);
 
         // Assert
         Assertions.ExceptionFailure(result);
@@ -128,7 +69,7 @@ public class Bind_ExceptionFailure
         var func = Functions.GetAsyncFunction();
 
         // Act
-        var result = await _exceptionFailureResult.Bind(func, CancellationToken.None);
+        var result = await Results.ExceptionFailureResult.Bind(func, CancellationToken.None);
 
         // Assert
         Assertions.ExceptionFailure(result);
@@ -141,7 +82,7 @@ public class Bind_ExceptionFailure
         var func = Functions.GetFunction();
 
         // Act
-        var result = await _asyncExceptionFailureResult.Bind(func);
+        var result = await Results.AsyncExceptionFailureResult.Bind(func);
 
         // Assert
         Assertions.ExceptionFailure(result);
@@ -154,7 +95,7 @@ public class Bind_ExceptionFailure
         var func = Functions.GetAsyncFunction();
 
         // Act
-        var result = await _asyncExceptionFailureResult.Bind(func, CancellationToken.None);
+        var result = await Results.AsyncExceptionFailureResult.Bind(func, CancellationToken.None);
 
         // Assert
         Assertions.ExceptionFailure(result);
@@ -167,7 +108,7 @@ public class Bind_ExceptionFailure
         var func = Functions.GetNoParamFunction();
 
         // Act
-        var result = _exceptionFailureResult.Bind(func);
+        var result = Results.ExceptionFailureResult.Bind(func);
 
         // Assert
         Assertions.ExceptionFailure(result);
@@ -180,7 +121,7 @@ public class Bind_ExceptionFailure
         var func = Functions.GetNoParamAsyncFunction();
 
         // Act
-        var result = await _exceptionFailureResult.Bind(func, CancellationToken.None);
+        var result = await Results.ExceptionFailureResult.Bind(func, CancellationToken.None);
 
         // Assert
         Assertions.ExceptionFailure(result);
@@ -193,7 +134,7 @@ public class Bind_ExceptionFailure
         var func = Functions.GetNoParamFunction();
 
         // Act
-        var result = await _asyncExceptionFailureResult.Bind(func);
+        var result = await Results.AsyncExceptionFailureResult.Bind(func);
 
         // Assert
         Assertions.ExceptionFailure(result);
@@ -206,7 +147,7 @@ public class Bind_ExceptionFailure
         var func = Functions.GetNoParamAsyncFunction();
 
         // Act
-        var result = await _asyncExceptionFailureResult.Bind(func, CancellationToken.None);
+        var result = await Results.AsyncExceptionFailureResult.Bind(func, CancellationToken.None);
 
         // Assert
         Assertions.ExceptionFailure(result);
