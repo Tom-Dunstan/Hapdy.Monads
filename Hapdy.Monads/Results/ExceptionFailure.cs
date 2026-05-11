@@ -9,8 +9,5 @@ public readonly record struct ExceptionFailure<T>(Exception Exception) : IExcept
 
     public bool IsFailure => true;
 
-    public static ExceptionFailure<T> Create(Exception exception)
-    {
-        return new ExceptionFailure<T>(exception);
-    }
+    public static ExceptionFailure<T> Create(Exception exception) { return new ExceptionFailure<T>(exception); }
 }

@@ -7,8 +7,5 @@ public readonly record struct Failure<T>(string ErrorMessage) : IFailure<T>
 
     public bool IsFailure => true;
 
-    public static Failure<T> Create(string errorMessage)
-    {
-        return new Failure<T>(errorMessage);
-    }
+    public static Failure<T> Create(string errorMessage) { return new Failure<T>(errorMessage); }
 }

@@ -6,29 +6,25 @@ using Hapdy.Monads.Results.Extensions;
 namespace Hapdy.Monads.Results.Testing_Bind;
 
 [TestFixture(TestOf = typeof(Failure<>)
-    , TestName = "Failure"
-    , Category = "1 - Bind")]
+           , TestName = "Failure"
+           , Category = "1 - Bind")]
 public class Bind_Failure
 {
     [SetUp]
     public void Setup()
     {
         Values.Initialise();
-        Results.FailureResult = Failure<int>.Create(Errors.ExpectedExceptionMessage);
+        Results.FailureResult      = Failure<int>.Create(Errors.ExpectedExceptionMessage);
         Results.AsyncFailureResult = Task.FromResult(Results.FailureResult);
     }
 
-    [TearDown]
-    public void TearDown()
-    {
-        Results.AsyncFailureResult.Dispose();
-    }
+    [TearDown] public void TearDown() { Results.AsyncFailureResult.Dispose(); }
 
     private static class Results
     {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value
-        public static IResult<int> FailureResult;
+        public static IResult<int>       FailureResult;
         public static Task<IResult<int>> AsyncFailureResult;
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.

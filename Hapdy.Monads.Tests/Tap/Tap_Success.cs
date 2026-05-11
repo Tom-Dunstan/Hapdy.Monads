@@ -6,14 +6,24 @@ using Hapdy.Monads.Results.Extensions;
 namespace Hapdy.Monads.Results.Testing_Tap;
 
 [TestFixture(TestOf = typeof(Success<>)
-    , TestName = "Success"
-    , Category = "3 - Tap")]
+           , TestName = "Success"
+           , Category = "3 - Tap")]
 public class Tap_Success
 {
+    [SetUp]
+    public void SetUp()
+    {
+        Values.Initialise();
+        Results.SuccessResult      = Success<int>.Create(Values.Test);
+        Results.AsyncSuccessResult = Task.FromResult(Results.SuccessResult);
+    }
+
+    [TearDown] public void TearDown() { Results.AsyncSuccessResult.Dispose(); }
+
     private static class Results
     {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        public static IResult<int> SuccessResult;
+        public static IResult<int>       SuccessResult;
         public static Task<IResult<int>> AsyncSuccessResult;
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     }
@@ -22,16 +32,16 @@ public class Tap_Success
     {
         public static void Successful(
             IResult<int> result
-            , IResult<int> originalResult
-            , int? valuePassed
-            , int? expectedValuePassedToFunction)
+          , IResult<int> originalResult
+          , int?         valuePassed
+          , int?         expectedValuePassedToFunction)
         {
             Assert.That(result, Is.InstanceOf<Success<int>>());
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(Values.FunctionWasCalled, Is.True);
-                Assert.That(valuePassed, Is.EqualTo(expectedValuePassedToFunction));
-                Assert.That(result, Is.EqualTo(originalResult));
+                Assert.That(valuePassed,              Is.EqualTo(expectedValuePassedToFunction));
+                Assert.That(result,                   Is.EqualTo(originalResult));
             }
         }
 
@@ -41,25 +51,11 @@ public class Tap_Success
             using (Assert.EnterMultipleScope())
             {
                 var exceptionFailure = (ExceptionFailure<int>)result;
-                Assert.That(Values.IntPassedToFunction, Is.Null);
-                Assert.That(exceptionFailure.Exception, Is.EqualTo(Errors.ExceptionThrown));
+                Assert.That(Values.IntPassedToFunction,         Is.Null);
+                Assert.That(exceptionFailure.Exception,         Is.EqualTo(Errors.ExceptionThrown));
                 Assert.That(exceptionFailure.Exception.Message, Is.EqualTo(Errors.ExpectedExceptionMessage));
             }
         }
-    }
-
-    [SetUp]
-    public void SetUp()
-    {
-        Values.Initialise();
-        Results.SuccessResult = Success<int>.Create(Values.Test);
-        Results.AsyncSuccessResult = Task.FromResult(Results.SuccessResult);
-    }
-
-    [TearDown]
-    public void TearDown()
-    {
-        Results.AsyncSuccessResult.Dispose();
     }
 
     [Test]
@@ -73,9 +69,9 @@ public class Tap_Success
 
         // Assert
         Assertions.Successful(result
-            , Results.SuccessResult
-            , Values.IntPassedToFunction
-            , Values.Test);
+                            , Results.SuccessResult
+                            , Values.IntPassedToFunction
+                            , Values.Test);
     }
 
     [Test]
@@ -89,9 +85,9 @@ public class Tap_Success
 
         // Assert
         Assertions.Successful(result
-            , Results.SuccessResult
-            , Values.IntPassedToFunction
-            , Values.Test);
+                            , Results.SuccessResult
+                            , Values.IntPassedToFunction
+                            , Values.Test);
     }
 
     [Test]
@@ -105,9 +101,9 @@ public class Tap_Success
 
         // Assert
         Assertions.Successful(result
-            , Results.SuccessResult
-            , Values.IntPassedToFunction
-            , Values.Test);
+                            , Results.SuccessResult
+                            , Values.IntPassedToFunction
+                            , Values.Test);
     }
 
     [Test]
@@ -121,9 +117,9 @@ public class Tap_Success
 
         // Assert
         Assertions.Successful(result
-            , Results.SuccessResult
-            , Values.IntPassedToFunction
-            , Values.Test);
+                            , Results.SuccessResult
+                            , Values.IntPassedToFunction
+                            , Values.Test);
     }
 
     [Test]
@@ -137,9 +133,9 @@ public class Tap_Success
 
         // Assert
         Assertions.Successful(result
-            , Results.SuccessResult
-            , Values.IntPassedToFunction
-            , null);
+                            , Results.SuccessResult
+                            , Values.IntPassedToFunction
+                            , null);
     }
 
     [Test]
@@ -153,9 +149,9 @@ public class Tap_Success
 
         // Assert
         Assertions.Successful(result
-            , Results.SuccessResult
-            , Values.IntPassedToFunction
-            , null);
+                            , Results.SuccessResult
+                            , Values.IntPassedToFunction
+                            , null);
     }
 
     [Test]
@@ -169,9 +165,9 @@ public class Tap_Success
 
         // Assert
         Assertions.Successful(result
-            , Results.SuccessResult
-            , Values.IntPassedToFunction
-            , null);
+                            , Results.SuccessResult
+                            , Values.IntPassedToFunction
+                            , null);
     }
 
     [Test]
@@ -185,9 +181,9 @@ public class Tap_Success
 
         // Assert
         Assertions.Successful(result
-            , Results.SuccessResult
-            , Values.IntPassedToFunction
-            , null);
+                            , Results.SuccessResult
+                            , Values.IntPassedToFunction
+                            , null);
     }
 
     [Test]

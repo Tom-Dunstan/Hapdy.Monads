@@ -6,45 +6,41 @@ using Hapdy.Monads.Results.Extensions;
 namespace Hapdy.Monads.Results.Testing_Then;
 
 [TestFixture(TestOf = typeof(Success<>)
-    , TestName = "Success"
-    , Category = "2 - Then")]
+           , TestName = "Success"
+           , Category = "2 - Then")]
 public class Then_Success
 {
-    private static class Results
-    {
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        public static IResult<int> SuccessResult;
-        public static Task<IResult<int>> AsyncSuccessResult;
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-    }
-
     [SetUp]
     public void SetUp()
     {
         Values.Initialise();
-        Results.SuccessResult = Success<int>.Create(Values.Test);
+        Results.SuccessResult      = Success<int>.Create(Values.Test);
         Results.AsyncSuccessResult = Task.FromResult(Results.SuccessResult);
     }
 
-    [TearDown]
-    public void TearDown()
+    [TearDown] public void TearDown() { Results.AsyncSuccessResult.Dispose(); }
+
+    private static class Results
     {
-        Results.AsyncSuccessResult.Dispose();
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        public static IResult<int>       SuccessResult;
+        public static Task<IResult<int>> AsyncSuccessResult;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     }
 
     private static class Assertions
     {
         public static void Successful<T, TReturn>(
             IResult<TReturn> result
-            , T? valuePassed
-            , T? expectedValuePassedToFunction
-            , TReturn expectedResultValue)
+          , T?               valuePassed
+          , T?               expectedValuePassedToFunction
+          , TReturn          expectedResultValue)
         {
             Assert.That(result, Is.InstanceOf<Success<TReturn>>());
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(Values.FunctionWasCalled, Is.True);
-                Assert.That(valuePassed, Is.EqualTo(expectedValuePassedToFunction));
+                Assert.That(valuePassed,              Is.EqualTo(expectedValuePassedToFunction));
                 var successResult = (Success<TReturn>)result;
                 Assert.That(successResult.Value, Is.EqualTo(expectedResultValue));
             }
@@ -56,8 +52,8 @@ public class Then_Success
             using (Assert.EnterMultipleScope())
             {
                 var exceptionFailure = (ExceptionFailure<TReturn>)result;
-                Assert.That(exceptionFailure.Exception, Is.Not.Null);
-                Assert.That(exceptionFailure.Exception, Is.EqualTo(Errors.ExceptionThrown));
+                Assert.That(exceptionFailure.Exception,         Is.Not.Null);
+                Assert.That(exceptionFailure.Exception,         Is.EqualTo(Errors.ExceptionThrown));
                 Assert.That(exceptionFailure.Exception.Message, Is.EqualTo(Errors.ExpectedExceptionMessage));
             }
         }
@@ -74,9 +70,9 @@ public class Then_Success
 
         // Assert
         Assertions.Successful(result
-            , Values.Test
-            , Values.IntPassedToFunction
-            , Values.ExpectedValue);
+                            , Values.Test
+                            , Values.IntPassedToFunction
+                            , Values.ExpectedValue);
     }
 
     [Test]
@@ -90,9 +86,9 @@ public class Then_Success
 
         // Assert
         Assertions.Successful(resultAfterBind
-            , Values.Test
-            , Values.IntPassedToFunction
-            , Values.ExpectedValue);
+                            , Values.Test
+                            , Values.IntPassedToFunction
+                            , Values.ExpectedValue);
     }
 
     [Test]
@@ -106,9 +102,9 @@ public class Then_Success
 
         // Assert
         Assertions.Successful(result
-            , Values.Test
-            , Values.IntPassedToFunction
-            , Values.ExpectedValue);
+                            , Values.Test
+                            , Values.IntPassedToFunction
+                            , Values.ExpectedValue);
     }
 
     [Test]
@@ -122,9 +118,9 @@ public class Then_Success
 
         // Assert
         Assertions.Successful(result
-            , Values.Test
-            , Values.IntPassedToFunction
-            , Values.ExpectedValue);
+                            , Values.Test
+                            , Values.IntPassedToFunction
+                            , Values.ExpectedValue);
     }
 
     [Test]
@@ -138,9 +134,9 @@ public class Then_Success
 
         // Assert
         Assertions.Successful(result
-            , null
-            , Values.StringPassedToFunction
-            , Values.ExpectedStringValue);
+                            , null
+                            , Values.StringPassedToFunction
+                            , Values.ExpectedStringValue);
     }
 
     [Test]
@@ -154,9 +150,9 @@ public class Then_Success
 
         // Assert
         Assertions.Successful(result
-            , null
-            , Values.StringPassedToFunction
-            , Values.ExpectedStringValue);
+                            , null
+                            , Values.StringPassedToFunction
+                            , Values.ExpectedStringValue);
     }
 
     [Test]
@@ -170,9 +166,9 @@ public class Then_Success
 
         // Assert
         Assertions.Successful(result
-            , null
-            , Values.StringPassedToFunction
-            , Values.ExpectedStringValue);
+                            , null
+                            , Values.StringPassedToFunction
+                            , Values.ExpectedStringValue);
     }
 
     [Test]
@@ -186,9 +182,9 @@ public class Then_Success
 
         // Assert
         Assertions.Successful(result
-            , null
-            , Values.StringPassedToFunction
-            , Values.ExpectedStringValue);
+                            , null
+                            , Values.StringPassedToFunction
+                            , Values.ExpectedStringValue);
     }
 
     [Test]

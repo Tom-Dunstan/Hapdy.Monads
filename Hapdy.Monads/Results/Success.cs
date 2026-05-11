@@ -7,8 +7,5 @@ public readonly record struct Success<T>(T Value) : ISuccess<T>
 
     public bool IsFailure => false;
 
-    public static Success<T> Create(T value)
-    {
-        return new Success<T>(value);
-    }
+    public static Success<T> Create(T value) { return new Success<T>(value); }
 }

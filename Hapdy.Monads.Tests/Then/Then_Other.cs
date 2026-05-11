@@ -6,11 +6,13 @@ using Hapdy.Monads.Results.Extensions;
 namespace Hapdy.Monads.Results.Testing_Then;
 
 [TestFixture(TestOf = typeof(IResult<>)
-    , TestName = "Other"
-    , Category = "2 - Then")]
+           , TestName = "Other"
+           , Category = "2 - Then")]
 [TestFixture]
 public class Then_Other
 {
+    [SetUp] public void SetUp() { Values.Initialise(); }
+
     private sealed record TestResult<T> : IResult<T>
     {
         public bool IsSuccess => false;
@@ -26,17 +28,11 @@ public class Then_Other
     {
         public static void Unknown(IResult<int> result)
         {
-            Assert.That(result, Is.InstanceOf<ExceptionFailure<int>>());
+            Assert.That(result,                   Is.InstanceOf<ExceptionFailure<int>>());
             Assert.That(Values.FunctionWasCalled, Is.False);
             var exceptionFailure = (ExceptionFailure<int>)result;
             Assert.That(exceptionFailure.Exception, Is.InstanceOf<ArgumentOutOfRangeException>());
         }
-    }
-
-    [SetUp]
-    public void SetUp()
-    {
-        Values.Initialise();
     }
 
     [Test]

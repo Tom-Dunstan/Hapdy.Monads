@@ -6,14 +6,24 @@ using Hapdy.Monads.Results.Extensions;
 namespace Hapdy.Monads.Results.Testing_Tap;
 
 [TestFixture(TestOf = typeof(Failure<>)
-    , TestName = "ExceptionFailure"
-    , Category = "3 - Tap")]
+           , TestName = "ExceptionFailure"
+           , Category = "3 - Tap")]
 public class Tap_ExceptionFailure
 {
+    [SetUp]
+    public void SetUp()
+    {
+        Values.Initialise();
+        Results.ExceptionFailureResult      = ExceptionFailure<int>.Create(Errors.ExceptionThrown);
+        Results.AsyncExceptionFailureResult = Task.FromResult(Results.ExceptionFailureResult);
+    }
+
+    [TearDown] public void TearDown() { Results.AsyncExceptionFailureResult.Dispose(); }
+
     private static class Results
     {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        public static IResult<int> ExceptionFailureResult;
+        public static IResult<int>       ExceptionFailureResult;
         public static Task<IResult<int>> AsyncExceptionFailureResult;
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     }
@@ -63,32 +73,18 @@ public class Tap_ExceptionFailure
     private static class Assertions
     {
         public static void ExceptionFailure(
-              IResult<int> result
-            , IResult<int> originalResult)
+            IResult<int> result
+          , IResult<int> originalResult)
         {
             Assert.That(result, Is.InstanceOf<ExceptionFailure<int>>());
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(result, Is.EqualTo(originalResult));
-                Assert.That(Values.FunctionWasCalled, Is.False);
+                Assert.That(result,                     Is.EqualTo(originalResult));
+                Assert.That(Values.FunctionWasCalled,   Is.False);
                 Assert.That(Values.IntPassedToFunction, Is.Null);
-                Assert.That(result, Is.EqualTo(originalResult));
+                Assert.That(result,                     Is.EqualTo(originalResult));
             }
         }
-    }
-
-    [SetUp]
-    public void SetUp()
-    {
-        Values.Initialise();
-        Results.ExceptionFailureResult = ExceptionFailure<int>.Create(Errors.ExceptionThrown);
-        Results.AsyncExceptionFailureResult = Task.FromResult(Results.ExceptionFailureResult);
-    }
-
-    [TearDown]
-    public void TearDown()
-    {
-        Results.AsyncExceptionFailureResult.Dispose();
     }
 
     [Test]

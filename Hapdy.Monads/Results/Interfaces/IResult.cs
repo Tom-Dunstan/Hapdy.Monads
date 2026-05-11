@@ -21,10 +21,7 @@ public interface IResult
     /// <param name="value">Value to be mapped</param>
     /// <typeparam name="T">Type of value</typeparam>
     /// <returns>Result of mapping</returns>
-    public static IResult<T> Map<T>(T value)
-    {
-        return Success<T>.Create(value);
-    }
+    public static IResult<T> Map<T>(T value) { return Success<T>.Create(value); }
 
     /// <summary>
     ///     Map a value to a result
@@ -33,8 +30,8 @@ public interface IResult
     /// <param name="func">Function to map value to result</param>
     /// <returns>Result of mapping</returns>
     public static IResult<TValue> Map<T, TValue>(
-        T? value
-        , Func<T?, IResult<TValue>> func)
+        T?                        value
+      , Func<T?, IResult<TValue>> func)
         where T : notnull
     {
         try
@@ -55,9 +52,9 @@ public interface IResult
     /// <param name="cancellationToken">Cancellation token for asynchronous operations</param>
     /// <returns>Result of mapping</returns>
     public static Task<IResult<TValue>> Map<T, TValue>(
-        T? value
-        , Func<T?, CancellationToken, Task<IResult<TValue>>> func
-        , CancellationToken cancellationToken)
+        T?                                                 value
+      , Func<T?, CancellationToken, Task<IResult<TValue>>> func
+      , CancellationToken                                  cancellationToken)
         where T : notnull
     {
         try
@@ -77,8 +74,8 @@ public interface IResult
     /// <param name="func">Validation function</param>
     /// <returns>Result of validation</returns>
     public static IResult<TValue> Validate<T, TValue>(
-        T? value
-        , Func<T?, IResult<TValue>> func)
+        T?                        value
+      , Func<T?, IResult<TValue>> func)
         where T : notnull
     {
         return Map(value, func);
@@ -92,14 +89,14 @@ public interface IResult
     /// <param name="cancellationToken">Cancellation token for asynchronous operations</param>
     /// <returns>Result of validation</returns>
     public static Task<IResult<TValue>> Validate<T, TValue>(
-        T? value
-        , Func<T?, CancellationToken, Task<IResult<TValue>>> func
-        , CancellationToken cancellationToken)
+        T?                                                 value
+      , Func<T?, CancellationToken, Task<IResult<TValue>>> func
+      , CancellationToken                                  cancellationToken)
         where T : notnull
     {
         return Map(value
-            , func
-            , cancellationToken);
+                 , func
+                 , cancellationToken);
     }
 }
 
@@ -113,8 +110,9 @@ public interface IResult<out T> : IResult
     /// <param name="func">Function to map value to result</param>
     /// <typeparam name="TValue">Type of value</typeparam>
     /// <returns>Result of mapping</returns>
-    public static IResult<T> Map<TValue>(TValue value
-        , Func<TValue, IResult<T>> func)
+    public static IResult<T> Map<TValue>(
+        TValue                   value
+      , Func<TValue, IResult<T>> func)
     {
         try
         {
@@ -134,9 +132,10 @@ public interface IResult<out T> : IResult
     /// <typeparam name="TValue">Type of value</typeparam>
     /// <param name="cancellationToken">Cancellation token for asynchronous operations</param>
     /// <returns>Result of mapping</returns>
-    public static Task<IResult<T>> Map<TValue>(TValue value
-        , Func<TValue, CancellationToken, Task<IResult<T>>> func
-        , CancellationToken cancellationToken)
+    public static Task<IResult<T>> Map<TValue>(
+        TValue                                            value
+      , Func<TValue, CancellationToken, Task<IResult<T>>> func
+      , CancellationToken                                 cancellationToken)
     {
         try
         {
@@ -154,10 +153,7 @@ public interface IResult<out T> : IResult
     /// <param name="value">Value/model to be validated</param>
     /// <param name="func">Validation function</param>
     /// <returns>Result of validation</returns>
-    public static IResult<T> Validate<TValue>(TValue value, Func<TValue, IResult<T>> func)
-    {
-        return Map(value, func);
-    }
+    public static IResult<T> Validate<TValue>(TValue value, Func<TValue, IResult<T>> func) { return Map(value, func); }
 
     /// <summary>
     ///     Validates a value/model
@@ -166,10 +162,13 @@ public interface IResult<out T> : IResult
     /// <param name="func">Validation function</param>
     /// <param name="cancellationToken">Cancellation token for asynchronous operations</param>
     /// <returns>Result of validation</returns>
-    public static Task<IResult<T>> Validate<TValue>(TValue value
-        , Func<TValue, CancellationToken, Task<IResult<T>>> func
-        , CancellationToken cancellationToken)
+    public static Task<IResult<T>> Validate<TValue>(
+        TValue                                            value
+      , Func<TValue, CancellationToken, Task<IResult<T>>> func
+      , CancellationToken                                 cancellationToken)
     {
-        return Map(value, func, cancellationToken);
+        return Map(value
+                 , func
+          ,        cancellationToken);
     }
 }

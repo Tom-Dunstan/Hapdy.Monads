@@ -14,7 +14,7 @@ public static partial class ResultHelper
         /// <returns>The result of the matched function</returns>
         public async Task<IResult<T>> OnFailure(
             Func<CancellationToken, Task<IResult<T>>> failFunc
-            , CancellationToken cancellationToken)
+          , CancellationToken                         cancellationToken)
         {
             var result = await resultTask;
             return await result.OnFailure(failFunc, cancellationToken);
@@ -28,7 +28,7 @@ public static partial class ResultHelper
         /// <returns>The result of the matched function</returns>
         public async Task<IResult<T>> OnFailure(
             Func<IFailure<T>, CancellationToken, Task<IResult<T>>> failFunc
-            , CancellationToken cancellationToken)
+          , CancellationToken                                      cancellationToken)
         {
             var result = await resultTask;
             return await result.OnFailure(failFunc, cancellationToken);
@@ -64,46 +64,53 @@ public static partial class ResultHelper
         private async Task<IResult<T>> OnFailureResult(Func<IFailure<T>, Task<IResult<T>>> failFunc)
         {
             return await RunFunctionWithCatchAsync(async () => result switch
-            {
-                ISuccess<T> success => success, IExceptionFailure<T> => result,
-                IFailure<T> failure => await failFunc(failure)
+                                                               {
+                                                                   ISuccess<T> success  => success
+                                                                 , IExceptionFailure<T> => result
+                                                                 , IFailure<T> failure  => await failFunc(failure)
 #pragma warning disable CA2208
-                , _ => ExceptionFailure<T>.Create(new ArgumentOutOfRangeException(nameof(result)))
+                                                                 , _ => ExceptionFailure<T>.Create(new ArgumentOutOfRangeException(nameof(result)))
 #pragma warning restore CA2208
-            });
+                                                               });
         }
 
         private async Task<IResult<T>> OnFailureResult(Func<Task<IResult<T>>> failFunc)
         {
             return await RunFunctionWithCatchAsync(async () => result switch
-            {
-                ISuccess<T> success => success, IExceptionFailure<T> => result, IFailure<T> => await failFunc()
+                                                               {
+                                                                   ISuccess<T> success  => success
+                                                                 , IExceptionFailure<T> => result
+                                                                 , IFailure<T>          => await failFunc()
 #pragma warning disable CA2208
-                , _ => ExceptionFailure<T>.Create(new ArgumentOutOfRangeException(nameof(result)))
+                                                                 , _ => ExceptionFailure<T>.Create(new ArgumentOutOfRangeException(nameof(result)))
 #pragma warning restore CA2208
-            });
+                                                               });
         }
 
         private IResult<T> OnFailureResult(Func<IFailure<T>, IResult<T>> failFunc)
         {
             return RunFunctionWithCatch(() => result switch
-            {
-                ISuccess<T> success => success, IExceptionFailure<T> => result, IFailure<T> failure => failFunc(failure)
+                                              {
+                                                  ISuccess<T> success  => success
+                                                , IExceptionFailure<T> => result
+                                                , IFailure<T> failure  => failFunc(failure)
 #pragma warning disable CA2208
-                , _ => ExceptionFailure<T>.Create(new ArgumentOutOfRangeException(nameof(result)))
+                                                , _ => ExceptionFailure<T>.Create(new ArgumentOutOfRangeException(nameof(result)))
 #pragma warning restore CA2208
-            });
+                                              });
         }
 
         private IResult<T> OnFailureResult(Func<IResult<T>> failFunc)
         {
             return RunFunctionWithCatch(() => result switch
-            {
-                ISuccess<T> success => success, IExceptionFailure<T> => result, IFailure<T> => failFunc()
+                                              {
+                                                  ISuccess<T> success  => success
+                                                , IExceptionFailure<T> => result
+                                                , IFailure<T>          => failFunc()
 #pragma warning disable CA2208
-                , _ => ExceptionFailure<T>.Create(new ArgumentOutOfRangeException(nameof(result)))
+                                                , _ => ExceptionFailure<T>.Create(new ArgumentOutOfRangeException(nameof(result)))
 #pragma warning restore CA2208
-            });
+                                              });
         }
 
         /// <summary>
@@ -111,20 +118,14 @@ public static partial class ResultHelper
         /// </summary>
         /// <param name="failFunc">The function to run on failure</param>
         /// <returns>The result of the short-circuited function</returns>
-        public IResult<T> OnFailure(Func<IResult<T>> failFunc)
-        {
-            return result.OnFailureResult(failFunc);
-        }
+        public IResult<T> OnFailure(Func<IResult<T>> failFunc) { return result.OnFailureResult(failFunc); }
 
         /// <summary>
         ///     Runs the <paramref name="failFunc" /> if the result is a failure. Otherwise, returns the result.
         /// </summary>
         /// <param name="failFunc">The function to run on failure</param>
         /// <returns>The result of the short-circuited function</returns>
-        public IResult<T> OnFailure(Func<IFailure<T>, IResult<T>> failFunc)
-        {
-            return result.OnFailureResult(failFunc);
-        }
+        public IResult<T> OnFailure(Func<IFailure<T>, IResult<T>> failFunc) { return result.OnFailureResult(failFunc); }
 
         /// <summary>
         ///     Runs the <paramref name="failFunc" /> if the result is a failure. Otherwise, returns the result.
@@ -134,10 +135,10 @@ public static partial class ResultHelper
         /// <returns>The result of the matched function</returns>
         public Task<IResult<T>> OnFailure(
             Func<IFailure<T>, CancellationToken, Task<IResult<T>>> failFunc
-            , CancellationToken cancellationToken)
+          , CancellationToken                                      cancellationToken)
         {
             return result.OnFailureResult(failure => failFunc(failure
-                , cancellationToken));
+                                                            , cancellationToken));
         }
 
         /// <summary>
@@ -148,7 +149,7 @@ public static partial class ResultHelper
         /// <returns>The result of the matched function</returns>
         public Task<IResult<T>> OnFailure(
             Func<CancellationToken, Task<IResult<T>>> failFunc
-            , CancellationToken cancellationToken)
+          , CancellationToken                         cancellationToken)
         {
             return result.OnFailureResult(() => failFunc(cancellationToken));
         }

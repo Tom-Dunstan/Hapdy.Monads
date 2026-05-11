@@ -6,14 +6,24 @@ using Hapdy.Monads.Results.Extensions;
 namespace Hapdy.Monads.Results.Testing_Then;
 
 [TestFixture(TestOf = typeof(Failure<>)
-    , TestName = "Failure"
-    , Category = "2 - Then")]
+           , TestName = "Failure"
+           , Category = "2 - Then")]
 public class Then_Failure
 {
+    [SetUp]
+    public void Setup()
+    {
+        Values.Initialise();
+        Results.FailureResult      = Failure<int>.Create(Errors.ExpectedExceptionMessage);
+        Results.AsyncFailureResult = Task.FromResult(Results.FailureResult);
+    }
+
+    [TearDown] public void TearDown() { Results.AsyncFailureResult.Dispose(); }
+
     private static class Results
     {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        public static IResult<int> FailureResult;
+        public static IResult<int>       FailureResult;
         public static Task<IResult<int>> AsyncFailureResult;
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     }
@@ -30,20 +40,6 @@ public class Then_Failure
                 Assert.That(failureResult.ErrorMessage, Is.EqualTo(Errors.ExpectedExceptionMessage));
             }
         }
-    }
-
-    [SetUp]
-    public void Setup()
-    {
-        Values.Initialise();
-        Results.FailureResult = Failure<int>.Create(Errors.ExpectedExceptionMessage);
-        Results.AsyncFailureResult = Task.FromResult(Results.FailureResult);
-    }
-
-    [TearDown]
-    public void TearDown()
-    {
-        Results.AsyncFailureResult.Dispose();
     }
 
     [Test]

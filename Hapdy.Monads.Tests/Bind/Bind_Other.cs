@@ -6,16 +6,12 @@ using Hapdy.Monads.Results.Extensions;
 namespace Hapdy.Monads.Results.Testing_Bind;
 
 [TestFixture(TestOf = typeof(IResult<>)
-    , TestName = "Other"
-    , Category = "1 - Bind")]
+           , TestName = "Other"
+           , Category = "1 - Bind")]
 [TestFixture]
 public class Bind_Other
 {
-    [SetUp]
-    public void SetUp()
-    {
-        Values.Initialise();
-    }
+    [SetUp] public void SetUp() { Values.Initialise(); }
 
     private sealed record TestResult<T> : IResult<T>
     {
@@ -32,7 +28,7 @@ public class Bind_Other
     {
         public static void Unknown(IResult<int> result)
         {
-            Assert.That(result, Is.InstanceOf<ExceptionFailure<int>>());
+            Assert.That(result,                   Is.InstanceOf<ExceptionFailure<int>>());
             Assert.That(Values.FunctionWasCalled, Is.False);
             var exceptionFailure = (ExceptionFailure<int>)result;
             Assert.That(exceptionFailure.Exception, Is.InstanceOf<ArgumentOutOfRangeException>());

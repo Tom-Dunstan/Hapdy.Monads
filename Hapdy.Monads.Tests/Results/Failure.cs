@@ -4,14 +4,11 @@
 namespace Hapdy.Monads.Results.Testing_Failure;
 
 [TestFixture(TestOf = typeof(Failure<>)
-    , TestName = "Failure"
-    , Category = "0 - Results")]
+           , TestName = "Failure"
+           , Category = "0 - Results")]
 public class Failure
 {
-    [SetUp]
-    public void Setup()
-    {
-    }
+    [SetUp] public void Setup() { }
 
     [Test]
     public void When_TestingIsSuccess_Then_ReturnsFalse()
@@ -25,9 +22,9 @@ public class Failure
 
         // Assert
         Assert.Multiple(() =>
-        {
-            Assert.That(isSuccess, Is.False);
-            Assert.That(isFailure, Is.True);
-        });
+                        {
+                            Assert.That(isSuccess, Is.False);
+                            Assert.That(isFailure, Is.True);
+                        });
     }
 }

@@ -14,8 +14,8 @@ public static partial class ResultHelper
         /// <param name="cancellationToken">CancellationToken</param>
         /// <returns>A result after handling exceptions</returns>
         public async Task<IResult<T>> Catch(
-            Func<IExceptionFailure<T>, CancellationToken, Task<IResult<T>>> exceptionFunc,
-            CancellationToken cancellationToken)
+            Func<IExceptionFailure<T>, CancellationToken, Task<IResult<T>>> exceptionFunc
+          , CancellationToken                                               cancellationToken)
         {
             var result = await resultTask;
             return await result.Catch(exceptionFunc, cancellationToken);
@@ -45,9 +45,10 @@ public static partial class ResultHelper
         public IResult<T> Catch(Func<IExceptionFailure<T>, IResult<T>> exceptionFunc)
         {
             return result switch
-            {
-                IExceptionFailure<T> exceptionFailure => exceptionFunc(exceptionFailure), _ => result
-            };
+                   {
+                       IExceptionFailure<T> exceptionFailure => exceptionFunc(exceptionFailure)
+                     , _                                     => result
+                   };
         }
 
         /// <summary>
@@ -58,14 +59,14 @@ public static partial class ResultHelper
         /// <param name="cancellationToken">Cancellation token for asynchronous operations</param>
         /// <returns>A result after handling exceptions</returns>
         public async Task<IResult<T>> Catch(
-            Func<IExceptionFailure<T>, CancellationToken, Task<IResult<T>>> exceptionFunc,
-            CancellationToken cancellationToken)
+            Func<IExceptionFailure<T>, CancellationToken, Task<IResult<T>>> exceptionFunc
+          , CancellationToken                                               cancellationToken)
         {
             return result switch
-            {
-                IExceptionFailure<T> exceptionFailure => await exceptionFunc(exceptionFailure, cancellationToken),
-                _ => result
-            };
+                   {
+                       IExceptionFailure<T> exceptionFailure => await exceptionFunc(exceptionFailure, cancellationToken)
+                     , _                                     => result
+                   };
         }
     }
 }

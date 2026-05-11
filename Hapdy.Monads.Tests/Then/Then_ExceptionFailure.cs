@@ -6,18 +6,28 @@ using Hapdy.Monads.Results.Extensions;
 namespace Hapdy.Monads.Results.Testing_Then;
 
 [TestFixture(TestOf = typeof(Failure<>)
-    , TestName = "ExceptionFailure"
-    , Category = "2 - Then")]
+           , TestName = "ExceptionFailure"
+           , Category = "2 - Then")]
 public class Then_ExceptionFailure
 {
+    [SetUp]
+    public void SetUp()
+    {
+        Values.Initialise();
+        Results.ExceptionFailureResult      = ExceptionFailure<int>.Create(Errors.ExceptionThrown);
+        Results.AsyncExceptionFailureResult = Task.FromResult(Results.ExceptionFailureResult);
+    }
+
+    [TearDown] public void TearDown() { Results.AsyncExceptionFailureResult.Dispose(); }
+
     private static class Results
     {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        public static IResult<int> ExceptionFailureResult;
+        public static IResult<int>       ExceptionFailureResult;
         public static Task<IResult<int>> AsyncExceptionFailureResult;
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     }
-    
+
     private static class Assertions
     {
         public static void ExceptionFailure<TReturn>(IResult<TReturn> result)
@@ -25,26 +35,12 @@ public class Then_ExceptionFailure
             Assert.That(result, Is.InstanceOf<ExceptionFailure<TReturn>>());
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(Values.FunctionWasCalled, Is.False);
+                Assert.That(Values.FunctionWasCalled,   Is.False);
                 Assert.That(Values.IntPassedToFunction, Is.Null);
                 var exceptionResult = (ExceptionFailure<TReturn>)result;
                 Assert.That(exceptionResult.Exception, Is.EqualTo(Errors.ExceptionThrown));
             }
         }
-    }
-
-    [SetUp]
-    public void SetUp()
-    {
-        Values.Initialise();
-        Results.ExceptionFailureResult = ExceptionFailure<int>.Create(Errors.ExceptionThrown);
-        Results.AsyncExceptionFailureResult = Task.FromResult(Results.ExceptionFailureResult);
-    }
-
-    [TearDown]
-    public void TearDown()
-    {
-        Results.AsyncExceptionFailureResult.Dispose();
     }
 
     [Test]

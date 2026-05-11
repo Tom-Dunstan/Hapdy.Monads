@@ -6,29 +6,25 @@ using Hapdy.Monads.Results.Extensions;
 namespace Hapdy.Monads.Results.Testing_Bind;
 
 [TestFixture(TestOf = typeof(Failure<>)
-    , TestName = "ExceptionFailure"
-    , Category = "1 - Bind")]
+           , TestName = "ExceptionFailure"
+           , Category = "1 - Bind")]
 public class Bind_ExceptionFailure
 {
     [SetUp]
     public void SetUp()
     {
         Values.Initialise();
-        Results.ExceptionFailureResult = ExceptionFailure<int>.Create(Errors.ExceptionThrown);
+        Results.ExceptionFailureResult      = ExceptionFailure<int>.Create(Errors.ExceptionThrown);
         Results.AsyncExceptionFailureResult = Task.FromResult(Results.ExceptionFailureResult);
     }
 
-    [TearDown]
-    public void TearDown()
-    {
-        Results.AsyncExceptionFailureResult.Dispose();
-    }
+    [TearDown] public void TearDown() { Results.AsyncExceptionFailureResult.Dispose(); }
 
     private static class Results
     {
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        public static IResult<int> ExceptionFailureResult;
+        public static IResult<int>       ExceptionFailureResult;
         public static Task<IResult<int>> AsyncExceptionFailureResult;
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value
@@ -41,7 +37,7 @@ public class Bind_ExceptionFailure
             Assert.That(result, Is.InstanceOf<ExceptionFailure<TReturn>>());
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(Values.FunctionWasCalled, Is.False);
+                Assert.That(Values.FunctionWasCalled,   Is.False);
                 Assert.That(Values.IntPassedToFunction, Is.Null);
                 var exceptionResult = (ExceptionFailure<TReturn>)result;
                 Assert.That(exceptionResult.Exception, Is.EqualTo(Errors.ExceptionThrown));

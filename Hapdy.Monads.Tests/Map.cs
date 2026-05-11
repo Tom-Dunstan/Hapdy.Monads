@@ -4,11 +4,17 @@
 namespace Hapdy.Monads.Results.Testing_Map;
 
 [TestFixture(TestOf = typeof(IResult)
-    , TestName = "Map"
-    , Category = "4 - Map")]
+           , TestName = "Map"
+           , Category = "4 - Map")]
 [TestFixture]
 public class Map
 {
+    [SetUp]
+    public void Setup()
+    {
+        Values.Initialise();
+        Values.FunctionWasCalled = false;
+    }
 
     private static class Assertions
     {
@@ -41,17 +47,10 @@ public class Map
             {
                 Assert.That(Values.FunctionWasCalled, Is.False);
                 var exceptionFailureResult = (ExceptionFailure<int>)result;
-                Assert.That(exceptionFailureResult.Exception, Is.EqualTo(Errors.ExceptionThrown));
+                Assert.That(exceptionFailureResult.Exception,    Is.EqualTo(Errors.ExceptionThrown));
                 Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(Errors.ExpectedExceptionMessage));
             }
         }
-    }
-
-    [SetUp]
-    public void Setup()
-    {
-        Values.Initialise();
-        Values.FunctionWasCalled = false;
     }
 
     [Test]
@@ -93,8 +92,8 @@ public class Map
 
         // Act
         var result = await IResult.Map(Values.Test
-            , func
-            , CancellationToken.None);
+                                     , func
+                                     , CancellationToken.None);
 
         // Assert
         Assertions.SuccessResult(result);
@@ -120,8 +119,8 @@ public class Map
 
         // Act
         var result = await IResult<int>.Map(Values.TestNullable
-            , func
-            , CancellationToken.None);
+                                          , func
+                                          , CancellationToken.None);
 
         // Assert
         Assertions.SuccessResult(result);
@@ -148,8 +147,8 @@ public class Map
 
         // Act
         var result = await IResult<int>.Map(Values.TestNull
-            , func
-            , CancellationToken.None);
+                                          , func
+                                          , CancellationToken.None);
 
         // Assert
         Assertions.FailureResult(result);
@@ -176,8 +175,8 @@ public class Map
 
         // Act
         var result = await IResult.Map(Values.Test
-            , func
-            , CancellationToken.None);
+                                     , func
+                                     , CancellationToken.None);
 
         // Assert
         Assertions.ExceptionFailureResult(result);
@@ -204,8 +203,8 @@ public class Map
 
         // Act
         var result = await IResult<int>.Map(Values.Test
-            , func
-            , CancellationToken.None);
+                                          , func
+                                          , CancellationToken.None);
 
         // Assert
         Assertions.ExceptionFailureResult(result);

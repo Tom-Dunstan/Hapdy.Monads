@@ -14,7 +14,7 @@ public static partial class ResultHelper
         /// <returns>A validated result</returns>
         public async Task<IResult<T>> Validate(
             Func<T, CancellationToken, Task<IResult<T>>> validationFunc
-            , CancellationToken cancellationToken)
+          , CancellationToken                            cancellationToken)
         {
             var result = await resultTask;
             return await result.Validate(validationFunc, cancellationToken);
@@ -54,7 +54,7 @@ public static partial class ResultHelper
         /// <returns>A validated result</returns>
         public Task<IResult<T>> Validate(
             Func<T, CancellationToken, Task<IResult<T>>> validationFunc
-            , CancellationToken cancellationToken)
+          , CancellationToken                            cancellationToken)
         {
             return result.Bind(validationFunc, cancellationToken);
         }
