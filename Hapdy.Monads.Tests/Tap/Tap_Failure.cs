@@ -10,66 +10,60 @@ namespace Hapdy.Monads.Results.Testing_Tap;
     , Category = "3 - Tap")]
 public class Tap_Failure
 {
-    [SetUp]
-    public void SetUp()
+    // private static bool Values.FunctionWasCalled;
+    //
+    // private static class Values
+    // {
+    //     public const string ExpectedValue = "Test Failure Message";
+    //
+    //     public static int? IntPassedToAction;
+    // }
+    //
+    // private static class Functions
+    // {
+    //     public static Action<int> GetAction()
+    //     {
+    //         return value =>
+    //         {
+    //             Values.FunctionWasCalled = true;
+    //             Values.IntPassedToAction = value;
+    //         };
+    //     }
+    //
+    //     public static Func<int, CancellationToken, Task> GetAsyncAction()
+    //     {
+    //         return (value, _) =>
+    //         {
+    //             Values.FunctionWasCalled = true;
+    //             Values.IntPassedToAction = value;
+    //             return Task.CompletedTask;
+    //         };
+    //     }
+    //
+    //     public static Action GetNoParamAction()
+    //     {
+    //         return () => { Values.FunctionWasCalled = true; };
+    //     }
+    //
+    //     public static Func<CancellationToken, Task> GetNoParamAsyncAction()
+    //     {
+    //         return _ =>
+    //         {
+    //             Values.FunctionWasCalled = true;
+    //             return Task.CompletedTask;
+    //         };
+    //     }
+    // }
+    //
+
+    private static class Results
     {
-        _functionWasCalled = false;
-        Values.IntPassedToAction = null;
-        _failureResult = Failure<int>.Create(Values.ExpectedValue);
-        _asyncFailureResult = Task.FromResult(_failureResult);
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        public static IResult<int> FailureResult;
+        public static Task<IResult<int>> AsyncFailureResult;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     }
-
-    [TearDown]
-    public void TearDown()
-    {
-        _asyncFailureResult.Dispose();
-    }
-
-    private static bool _functionWasCalled;
-
-    private static class Values
-    {
-        public const string ExpectedValue = "Test Failure Message";
-
-        public static int? IntPassedToAction;
-    }
-
-    private static class Functions
-    {
-        public static Action<int> GetAction()
-        {
-            return value =>
-            {
-                _functionWasCalled = true;
-                Values.IntPassedToAction = value;
-            };
-        }
-
-        public static Func<int, CancellationToken, Task> GetAsyncAction()
-        {
-            return (value, _) =>
-            {
-                _functionWasCalled = true;
-                Values.IntPassedToAction = value;
-                return Task.CompletedTask;
-            };
-        }
-
-        public static Action GetNoParamAction()
-        {
-            return () => { _functionWasCalled = true; };
-        }
-
-        public static Func<CancellationToken, Task> GetNoParamAsyncAction()
-        {
-            return _ =>
-            {
-                _functionWasCalled = true;
-                return Task.CompletedTask;
-            };
-        }
-    }
-
+    
     private static class Assertions
     {
         public static void Failure(
@@ -79,15 +73,26 @@ public class Tap_Failure
             Assert.That(result, Is.InstanceOf<Failure<int>>());
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(_functionWasCalled, Is.False);
-                Assert.That(Values.IntPassedToAction, Is.Null);
+                Assert.That(Values.FunctionWasCalled, Is.False);
+                Assert.That(Values.IntPassedToFunction, Is.Null);
                 Assert.That(result, Is.EqualTo(originalResult));
             }
         }
     }
 
-    private IResult<int> _failureResult;
-    private Task<IResult<int>> _asyncFailureResult;
+    [SetUp]
+    public void SetUp()
+    {
+        Values.Initialise();
+        Results.FailureResult = Failure<int>.Create(Errors.ExpectedExceptionMessage);
+        Results.AsyncFailureResult = Task.FromResult(Results.FailureResult);
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        Results.AsyncFailureResult.Dispose();
+    }
 
     [Test]
     public void When_SuccessFunctionExpectsValue_Then_DoesNotRunSuccessFunction()
@@ -96,10 +101,10 @@ public class Tap_Failure
         var func = Functions.GetAction();
 
         // Act
-        var result = _failureResult.Tap(func);
+        var result = Results.FailureResult.Tap(func);
 
         // Assert
-        Assertions.Failure(result, _failureResult);
+        Assertions.Failure(result, Results.FailureResult);
     }
 
     [Test]
@@ -109,10 +114,10 @@ public class Tap_Failure
         var func = Functions.GetAsyncAction();
 
         // Act
-        var result = await _failureResult.Tap(func, CancellationToken.None);
+        var result = await Results.FailureResult.Tap(func, CancellationToken.None);
 
         // Assert
-        Assertions.Failure(result, _failureResult);
+        Assertions.Failure(result, Results.FailureResult);
     }
 
     [Test]
@@ -122,10 +127,10 @@ public class Tap_Failure
         var func = Functions.GetAction();
 
         // Act
-        var result = await _asyncFailureResult.Tap(func);
+        var result = await Results.AsyncFailureResult.Tap(func);
 
         // Assert
-        Assertions.Failure(result, _failureResult);
+        Assertions.Failure(result, Results.FailureResult);
     }
 
     [Test]
@@ -135,10 +140,10 @@ public class Tap_Failure
         var func = Functions.GetAsyncAction();
 
         // Act
-        var result = await _asyncFailureResult.Tap(func, CancellationToken.None);
+        var result = await Results.AsyncFailureResult.Tap(func, CancellationToken.None);
 
         // Assert
-        Assertions.Failure(result, _failureResult);
+        Assertions.Failure(result, Results.FailureResult);
     }
 
     [Test]
@@ -148,10 +153,10 @@ public class Tap_Failure
         var func = Functions.GetNoParamAction();
 
         // Act
-        var result = _failureResult.Tap(func);
+        var result = Results.FailureResult.Tap(func);
 
         // Assert
-        Assertions.Failure(result, _failureResult);
+        Assertions.Failure(result, Results.FailureResult);
     }
 
     [Test]
@@ -161,10 +166,10 @@ public class Tap_Failure
         var func = Functions.GetNoParamAsyncAction();
 
         // Act
-        var result = await _failureResult.Tap(func, CancellationToken.None);
+        var result = await Results.FailureResult.Tap(func, CancellationToken.None);
 
         // Assert
-        Assertions.Failure(result, _failureResult);
+        Assertions.Failure(result, Results.FailureResult);
     }
 
     [Test]
@@ -174,10 +179,10 @@ public class Tap_Failure
         var func = Functions.GetNoParamAction();
 
         // Act
-        var result = await _asyncFailureResult.Tap(func);
+        var result = await Results.AsyncFailureResult.Tap(func);
 
         // Assert
-        Assertions.Failure(result, _failureResult);
+        Assertions.Failure(result, Results.FailureResult);
     }
 
     [Test]
@@ -187,9 +192,9 @@ public class Tap_Failure
         var func = Functions.GetNoParamAsyncAction();
 
         // Act
-        var result = await _asyncFailureResult.Tap(func, CancellationToken.None);
+        var result = await Results.AsyncFailureResult.Tap(func, CancellationToken.None);
 
         // Assert
-        Assertions.Failure(result, _failureResult);
+        Assertions.Failure(result, Results.FailureResult);
     }
 }

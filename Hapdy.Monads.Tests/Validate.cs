@@ -9,96 +9,6 @@ namespace Hapdy.Monads.Results.Testing_Validate;
 [TestFixture]
 public class Validate
 {
-    [SetUp]
-    public void Setup()
-    {
-        _functionWasCalled = false;
-    }
-
-    private static bool _functionWasCalled;
-
-    private static class Values
-    {
-        public const int TestValue = 42;
-        public const int ExpectedValue = 84;
-
-        public const string ErrorMessage = "Value must be greater than 30";
-        public const string ErrorMessageNullable = "Value must be greater than 30";
-        public const string ExpectedExceptionMessage = "Test exception message";
-        public static readonly int? TestNullableValue = 42;
-        public static readonly int? TestNullValue = null;
-        public static readonly Exception Exception = new(ExpectedExceptionMessage);
-    }
-
-    private static class Functions
-    {
-        public static Func<int, IResult<int>> GetFunction()
-        {
-            return value =>
-            {
-                _functionWasCalled = true;
-                _functionWasCalled = true;
-                return value > 30
-                    ? Success<int>.Create(value * 2)
-                    : Failure<int>.Create(Values.ErrorMessage);
-            };
-        }
-
-        public static Func<int, CancellationToken, Task<IResult<int>>> GetFunctionAsync()
-        {
-            return (value, _) =>
-            {
-                _functionWasCalled = true;
-                IResult<int> result = value > 30
-                    ? Success<int>.Create(value * 2)
-                    : Failure<int>.Create(Values.ErrorMessage);
-                return Task.FromResult(result);
-            };
-        }
-
-        public static Func<int?, IResult<int>> GetNullableFunction()
-        {
-            return value =>
-            {
-                _functionWasCalled = true;
-                return value == null
-                    ? Failure<int>.Create(Values.ErrorMessageNullable)
-                    : Success<int>.Create(value.Value * 2);
-            };
-        }
-
-        public static Func<int?, CancellationToken, Task<IResult<int>>> GetNullableFunctionAsync()
-        {
-            return (value, _) =>
-            {
-                _functionWasCalled = true;
-                IResult<int> result = value == null
-                    ? Failure<int>.Create(Values.ErrorMessageNullable)
-                    : Success<int>.Create(value.Value * 2);
-                return Task.FromResult(result);
-            };
-        }
-
-        public static Func<int, IResult<int>> GetExceptionFunction()
-        {
-            return _ => throw Values.Exception;
-        }
-
-        public static Func<int, CancellationToken, Task<IResult<int>>> GetExceptionFunctionAsync()
-        {
-            return (_, _) => throw Values.Exception;
-        }
-
-        public static Func<int?, IResult<int>> GetNullableExceptionFunction()
-        {
-            return _ => throw Values.Exception;
-        }
-
-        public static Func<int?, CancellationToken, Task<IResult<int>>> GetNullableExceptionFunctionAsync()
-        {
-            return (_, _) => throw Values.Exception;
-        }
-    }
 
     private static class Assertions
     {
@@ -107,7 +17,7 @@ public class Validate
             Assert.That(result, Is.InstanceOf<Success<int>>());
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(_functionWasCalled, Is.True);
+                Assert.That(Values.FunctionWasCalled, Is.True);
                 var successResult = (Success<int>)result;
                 Assert.That(successResult.Value, Is.EqualTo(Values.ExpectedValue));
             }
@@ -118,9 +28,9 @@ public class Validate
             Assert.That(result, Is.InstanceOf<Failure<int>>());
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(_functionWasCalled, Is.True);
+                Assert.That(Values.FunctionWasCalled, Is.True);
                 var failureResult = (Failure<int>)result;
-                Assert.That(failureResult.ErrorMessage, Is.EqualTo(Values.ErrorMessageNullable));
+                Assert.That(failureResult.ErrorMessage, Is.EqualTo(Errors.MessageNullable));
             }
         }
 
@@ -129,12 +39,18 @@ public class Validate
             Assert.That(result, Is.InstanceOf<ExceptionFailure<int>>());
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(_functionWasCalled, Is.False);
+                Assert.That(Values.FunctionWasCalled, Is.False);
                 var exceptionFailureResult = (ExceptionFailure<int>)result;
-                Assert.That(exceptionFailureResult.Exception, Is.EqualTo(Values.Exception));
-                Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(Values.ExpectedExceptionMessage));
+                Assert.That(exceptionFailureResult.Exception, Is.EqualTo(Errors.ExceptionThrown));
+                Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(Errors.ExpectedExceptionMessage));
             }
         }
+    }
+
+    [SetUp]
+    public void Setup()
+    {
+        Values.Initialise();
     }
 
     [Test]
@@ -144,7 +60,7 @@ public class Validate
         var mapFunction = Functions.GetFunction();
 
         // Act
-        var result = IResult.Validate(Values.TestValue, mapFunction);
+        var result = IResult.Validate(Values.Test, mapFunction);
 
         // Assert
         Assertions.AssertSuccessResult(result);
@@ -154,10 +70,10 @@ public class Validate
     public async Task When_ValueWithAsyncFunction_Then_ReturnsMappedValue()
     {
         // Arrange
-        var mapFunction = Functions.GetFunctionAsync();
+        var mapFunction = Functions.GetAsyncFunction();
 
         // Act
-        var result = await IResult.Validate(Values.TestValue
+        var result = await IResult.Validate(Values.Test
             , mapFunction
             , CancellationToken.None);
 
@@ -172,7 +88,7 @@ public class Validate
         var mapFunction = Functions.GetNullableFunction();
 
         // Act
-        var result = IResult<int>.Validate(Values.TestNullableValue, mapFunction);
+        var result = IResult<int>.Validate(Values.TestNullable, mapFunction);
 
         // Assert
         Assertions.AssertSuccessResult(result);
@@ -184,7 +100,7 @@ public class Validate
         var mapFunction = Functions.GetNullableFunctionAsync();
 
         // Act
-        var result = await IResult<int>.Validate(Values.TestNullableValue
+        var result = await IResult<int>.Validate(Values.TestNullable
             , mapFunction
             , CancellationToken.None);
 
@@ -199,7 +115,7 @@ public class Validate
         var mapFunction = Functions.GetNullableFunction();
 
         // Act
-        var result = IResult<int>.Validate(Values.TestNullValue, mapFunction);
+        var result = IResult<int>.Validate(Values.TestNull, mapFunction);
 
         // Assert
         Assertions.AssertFailureResult(result);
@@ -212,7 +128,7 @@ public class Validate
         var mapFunction = Functions.GetNullableFunctionAsync();
 
         // Act
-        var result = await IResult<int>.Validate(Values.TestNullValue
+        var result = await IResult<int>.Validate(Values.TestNull
             , mapFunction
             , CancellationToken.None);
 
@@ -224,10 +140,10 @@ public class Validate
     public void When_ValueWithFunctionThrowsException_Then_ReturnsExceptionFailure()
     {
         // Arrange
-        var mapFunction = Functions.GetExceptionFunction();
+        var mapFunction = Functions.GetExceptionFunction<int>();
 
         // Act
-        var result = IResult.Validate(Values.TestValue, mapFunction);
+        var result = IResult.Validate(Values.Test, mapFunction);
 
         // Assert
         Assertions.AssertExceptionFailureResult(result);
@@ -237,10 +153,10 @@ public class Validate
     public async Task When_ValueWithAsyncFunctionThrowsException_Then_ReturnsExceptionFailure()
     {
         // Arrange
-        var mapFunction = Functions.GetExceptionFunctionAsync();
+        var mapFunction = Functions.GetExceptionAsyncFunction<int>();
 
         // Act
-        var result = await IResult.Validate(Values.TestValue
+        var result = await IResult.Validate(Values.Test
             , mapFunction
             , CancellationToken.None);
 
@@ -255,7 +171,7 @@ public class Validate
         var mapFunction = Functions.GetNullableExceptionFunction();
 
         // Act
-        var result = IResult<int>.Validate(Values.TestValue, mapFunction);
+        var result = IResult<int>.Validate(Values.Test, mapFunction);
 
         // Assert
         Assertions.AssertExceptionFailureResult(result);
@@ -268,7 +184,7 @@ public class Validate
         var mapFunction = Functions.GetNullableExceptionFunctionAsync();
 
         // Act
-        var result = await IResult<int>.Validate(Values.TestValue
+        var result = await IResult<int>.Validate(Values.Test
             , mapFunction
             , CancellationToken.None);
 

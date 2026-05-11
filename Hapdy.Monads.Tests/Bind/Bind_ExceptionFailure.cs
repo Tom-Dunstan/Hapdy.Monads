@@ -105,7 +105,7 @@ public class Bind_ExceptionFailure
     public void When_SuccessFunctionExpectsNoValue_Then_DoesNotRunSuccessFunction()
     {
         // Arrange
-        var func = Functions.GetNoParamFunction();
+        var func = Functions.GetNoParamFunctionToString();
 
         // Act
         var result = Results.ExceptionFailureResult.Bind(func);
@@ -131,7 +131,7 @@ public class Bind_ExceptionFailure
     public async Task When_AsyncSuccessFunctionExpectsNoValue_Then_DoesNotRunSuccessFunction()
     {
         // Arrange
-        var func = Functions.GetNoParamFunction();
+        var func = Functions.GetNoParamFunctionToString();
 
         // Act
         var result = await Results.AsyncExceptionFailureResult.Bind(func);

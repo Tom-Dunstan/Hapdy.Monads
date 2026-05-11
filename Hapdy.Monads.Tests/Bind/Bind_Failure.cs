@@ -104,7 +104,7 @@ public class Bind_Failure
     public void When_FailureAndSuccessExpectsNoParam_Then_DoesNotRunSuccessFunction()
     {
         // Arrange
-        var func = Functions.GetNoParamFunction();
+        var func = Functions.GetNoParamFunctionToString();
 
         // Act
         var result = Results.FailureResult.Bind(func);
@@ -130,7 +130,7 @@ public class Bind_Failure
     public async Task When_AsyncFailureAndSuccessExpectsNoParam_Then_DoesNotRunSuccessFunction()
     {
         // Arrange
-        var func = Functions.GetNoParamFunction();
+        var func = Functions.GetNoParamFunctionToString();
 
         // Act
         var result = await Results.AsyncFailureResult.Bind(func);

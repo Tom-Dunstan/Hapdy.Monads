@@ -9,99 +9,6 @@ namespace Hapdy.Monads.Results.Testing_Map;
 [TestFixture]
 public class Map
 {
-    [SetUp]
-    public void Setup()
-    {
-        _functionWasCalled = false;
-    }
-
-    private static bool _functionWasCalled;
-
-    private static class Values
-    {
-        public const int Test = 42;
-        public const int Expected = 84;
-        public static readonly int? TestNullable = 42;
-        public static readonly int? TestNull = null;
-    }
-
-    private static class Errors
-    {
-        public const string Message = "Value must be greater than 30";
-        public const string MessageNullable = "Value must be greater than 30";
-        public const string ExpectedExceptionMessage = "Test exception message";
-        public static readonly Exception Exception = new(ExpectedExceptionMessage);
-    }
-
-    private static class Functions
-    {
-        public static Func<int, IResult<int>> GetFunction()
-        {
-            return value =>
-            {
-                _functionWasCalled = true;
-                return value > 30
-                    ? Success<int>.Create(value * 2)
-                    : Failure<int>.Create(Errors.Message);
-            };
-        }
-
-        public static Func<int, CancellationToken, Task<IResult<int>>> GetFunctionAsync()
-        {
-            return (value, _) =>
-            {
-                _functionWasCalled = true;
-                IResult<int> result = value > 30
-                    ? Success<int>.Create(value * 2)
-                    : Failure<int>.Create(Errors.Message);
-                return Task.FromResult(result);
-            };
-        }
-
-        public static Func<int?, IResult<int>> GetNullableFunction()
-        {
-            return value =>
-            {
-                _functionWasCalled = true;
-                return value == null
-                    ? Failure<int>.Create(Errors.MessageNullable)
-                    : Success<int>.Create(value.Value * 2);
-            };
-        }
-
-        public static Func<int?, CancellationToken, Task<IResult<int>>> GetNullableFunctionAsync()
-        {
-            return (value, _) =>
-            {
-                _functionWasCalled = true;
-                IResult<int> result = value == null
-                    ? Failure<int>.Create(Errors.MessageNullable)
-                    : Success<int>.Create(value.Value * 2);
-                return Task.FromResult(result);
-            };
-        }
-
-        public static Func<int, IResult<int>> GetExceptionFunction()
-        {
-            return _ => throw Errors.Exception;
-        }
-
-        public static Func<int, CancellationToken, Task<IResult<int>>> GetExceptionFunctionAsync()
-        {
-            return (_, _) => throw Errors.Exception;
-        }
-
-        public static Func<int?, IResult<int>> GetNullableExceptionFunction()
-        {
-            // ReSharper disable once UnusedParameter.Local
-            return value => throw Errors.Exception;
-        }
-
-        public static Func<int?, CancellationToken, Task<IResult<int>>> GetNullableExceptionFunctionAsync()
-        {
-            return (_, _) => throw Errors.Exception;
-        }
-    }
 
     private static class Assertions
     {
@@ -110,9 +17,9 @@ public class Map
             Assert.That(result, Is.InstanceOf<Success<int>>());
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(_functionWasCalled, Is.True);
+                Assert.That(Values.FunctionWasCalled, Is.True);
                 var successResult = (Success<int>)result;
-                Assert.That(successResult.Value, Is.EqualTo(Values.Expected));
+                Assert.That(successResult.Value, Is.EqualTo(Values.ExpectedValue));
             }
         }
 
@@ -121,7 +28,7 @@ public class Map
             Assert.That(result, Is.InstanceOf<Failure<int>>());
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(_functionWasCalled, Is.True);
+                Assert.That(Values.FunctionWasCalled, Is.True);
                 var failureResult = (Failure<int>)result;
                 Assert.That(failureResult.ErrorMessage, Is.EqualTo(Errors.MessageNullable));
             }
@@ -132,12 +39,19 @@ public class Map
             Assert.That(result, Is.InstanceOf<ExceptionFailure<int>>());
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(_functionWasCalled, Is.False);
+                Assert.That(Values.FunctionWasCalled, Is.False);
                 var exceptionFailureResult = (ExceptionFailure<int>)result;
-                Assert.That(exceptionFailureResult.Exception, Is.EqualTo(Errors.Exception));
+                Assert.That(exceptionFailureResult.Exception, Is.EqualTo(Errors.ExceptionThrown));
                 Assert.That(exceptionFailureResult.ErrorMessage, Is.EqualTo(Errors.ExpectedExceptionMessage));
             }
         }
+    }
+
+    [SetUp]
+    public void Setup()
+    {
+        Values.Initialise();
+        Values.FunctionWasCalled = false;
     }
 
     [Test]
@@ -175,7 +89,7 @@ public class Map
     public async Task When_ValueWithAsyncFunction_Then_ReturnsMappedValue()
     {
         // Arrange
-        var func = Functions.GetFunctionAsync();
+        var func = Functions.GetAsyncFunction();
 
         // Act
         var result = await IResult.Map(Values.Test
@@ -245,7 +159,7 @@ public class Map
     public void When_ValueWithFunctionThrowsException_Then_ReturnsExceptionFailure()
     {
         // Arrange
-        var func = Functions.GetExceptionFunction();
+        var func = Functions.GetExceptionFunction<int>();
 
         // Act
         var result = IResult.Map(Values.Test, func);
@@ -258,7 +172,7 @@ public class Map
     public async Task When_ValueWithAsyncFunctionThrowsException_Then_ReturnsExceptionFailure()
     {
         // Arrange
-        var func = Functions.GetExceptionFunctionAsync();
+        var func = Functions.GetExceptionAsyncFunction<int>();
 
         // Act
         var result = await IResult.Map(Values.Test
@@ -276,7 +190,7 @@ public class Map
         var func = Functions.GetNullableExceptionFunction();
 
         // Act
-        var result = IResult<int>.Map(Values.Test, func);
+        var result = IResult<int>.Map(Values.TestNullable, func);
 
         // Assert
         Assertions.ExceptionFailureResult(result);

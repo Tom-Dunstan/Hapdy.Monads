@@ -10,91 +10,12 @@ namespace Hapdy.Monads.Results.Testing_Tap;
     , Category = "3 - Tap")]
 public class Tap_Success
 {
-    [SetUp]
-    public void SetUp()
+    private static class Results
     {
-        _functionWasCalled = false;
-        Values.IntPassedToFunction = null;
-        _successResult = Success<int>.Create(Values.Test);
-        _asyncSuccessResult = Task.FromResult(_successResult);
-    }
-
-    [TearDown]
-    public void TearDown()
-    {
-        _asyncSuccessResult.Dispose();
-    }
-
-    private static bool _functionWasCalled;
-
-    private static class Values
-    {
-        public const int Test = 42;
-        public static readonly int? ExpectedValue = 42;
-
-        public static int? IntPassedToFunction;
-    }
-
-    private static class Errors
-    {
-        public const string ExpectedExceptionMessage = "Test exception message";
-        public static readonly Exception ExceptionThrown = new(ExpectedExceptionMessage);
-    }
-
-    private static class Functions
-    {
-        public static Action<int> GetAction()
-        {
-            return value =>
-            {
-                _functionWasCalled = true;
-                Values.IntPassedToFunction = value;
-            };
-        }
-
-        public static Func<int, CancellationToken, Task> GetAsyncAction()
-        {
-            return (value, _) =>
-            {
-                _functionWasCalled = true;
-                Values.IntPassedToFunction = value;
-                return Task.CompletedTask;
-            };
-        }
-
-        public static Action GetNoParamAction()
-        {
-            return () => { _functionWasCalled = true; };
-        }
-
-        public static Func<CancellationToken, Task> GetNoParamAsyncAction()
-        {
-            return _ =>
-            {
-                _functionWasCalled = true;
-                return Task.CompletedTask;
-            };
-        }
-
-        public static Action<int> GetExceptionAction()
-        {
-            return _ => throw Errors.ExceptionThrown;
-        }
-
-        public static Func<int, CancellationToken, Task> GetExceptionAsyncAction()
-        {
-            return (_, _) => throw Errors.ExceptionThrown;
-        }
-
-        public static Action GetNoParamExceptionAction()
-        {
-            return () => throw Errors.ExceptionThrown;
-        }
-
-        public static Func<CancellationToken, Task> GetNoParamExceptionAsyncAction()
-        {
-            return _ => throw Errors.ExceptionThrown;
-        }
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        public static IResult<int> SuccessResult;
+        public static Task<IResult<int>> AsyncSuccessResult;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     }
 
     private static class Assertions
@@ -108,7 +29,7 @@ public class Tap_Success
             Assert.That(result, Is.InstanceOf<Success<int>>());
             using (Assert.EnterMultipleScope())
             {
-                Assert.That(_functionWasCalled, Is.True);
+                Assert.That(Values.FunctionWasCalled, Is.True);
                 Assert.That(valuePassed, Is.EqualTo(expectedValuePassedToFunction));
                 Assert.That(result, Is.EqualTo(originalResult));
             }
@@ -127,8 +48,19 @@ public class Tap_Success
         }
     }
 
-    private IResult<int> _successResult;
-    private Task<IResult<int>> _asyncSuccessResult;
+    [SetUp]
+    public void SetUp()
+    {
+        Values.Initialise();
+        Results.SuccessResult = Success<int>.Create(Values.Test);
+        Results.AsyncSuccessResult = Task.FromResult(Results.SuccessResult);
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        Results.AsyncSuccessResult.Dispose();
+    }
 
     [Test]
     public void When_SuccessFunctionExpectsValue_Then_RunsSuccessFunction()
@@ -137,13 +69,13 @@ public class Tap_Success
         var func = Functions.GetAction();
 
         // Act
-        var result = _successResult.Tap(func);
+        var result = Results.SuccessResult.Tap(func);
 
         // Assert
         Assertions.Successful(result
-            , _successResult
+            , Results.SuccessResult
             , Values.IntPassedToFunction
-            , Values.ExpectedValue);
+            , Values.Test);
     }
 
     [Test]
@@ -153,13 +85,13 @@ public class Tap_Success
         var func = Functions.GetAsyncAction();
 
         // Act
-        var result = await _successResult.Tap(func, CancellationToken.None);
+        var result = await Results.SuccessResult.Tap(func, CancellationToken.None);
 
         // Assert
         Assertions.Successful(result
-            , _successResult
+            , Results.SuccessResult
             , Values.IntPassedToFunction
-            , Values.ExpectedValue);
+            , Values.Test);
     }
 
     [Test]
@@ -169,13 +101,13 @@ public class Tap_Success
         var func = Functions.GetAction();
 
         // Act
-        var result = await _asyncSuccessResult.Tap(func);
+        var result = await Results.AsyncSuccessResult.Tap(func);
 
         // Assert
         Assertions.Successful(result
-            , _successResult
+            , Results.SuccessResult
             , Values.IntPassedToFunction
-            , Values.ExpectedValue);
+            , Values.Test);
     }
 
     [Test]
@@ -185,13 +117,13 @@ public class Tap_Success
         var func = Functions.GetAsyncAction();
 
         // Act
-        var result = await _asyncSuccessResult.Tap(func, CancellationToken.None);
+        var result = await Results.AsyncSuccessResult.Tap(func, CancellationToken.None);
 
         // Assert
         Assertions.Successful(result
-            , _successResult
+            , Results.SuccessResult
             , Values.IntPassedToFunction
-            , Values.ExpectedValue);
+            , Values.Test);
     }
 
     [Test]
@@ -201,11 +133,11 @@ public class Tap_Success
         var func = Functions.GetNoParamAction();
 
         // Act
-        var result = _successResult.Tap(func);
+        var result = Results.SuccessResult.Tap(func);
 
         // Assert
         Assertions.Successful(result
-            , _successResult
+            , Results.SuccessResult
             , Values.IntPassedToFunction
             , null);
     }
@@ -217,11 +149,11 @@ public class Tap_Success
         var func = Functions.GetNoParamAsyncAction();
 
         // Act
-        var result = await _successResult.Tap(func, CancellationToken.None);
+        var result = await Results.SuccessResult.Tap(func, CancellationToken.None);
 
         // Assert
         Assertions.Successful(result
-            , _successResult
+            , Results.SuccessResult
             , Values.IntPassedToFunction
             , null);
     }
@@ -233,11 +165,11 @@ public class Tap_Success
         var func = Functions.GetNoParamAction();
 
         // Act
-        var result = await _asyncSuccessResult.Tap(func);
+        var result = await Results.AsyncSuccessResult.Tap(func);
 
         // Assert
         Assertions.Successful(result
-            , _successResult
+            , Results.SuccessResult
             , Values.IntPassedToFunction
             , null);
     }
@@ -249,11 +181,11 @@ public class Tap_Success
         var func = Functions.GetNoParamAsyncAction();
 
         // Act
-        var result = await _asyncSuccessResult.Tap(func, CancellationToken.None);
+        var result = await Results.AsyncSuccessResult.Tap(func, CancellationToken.None);
 
         // Assert
         Assertions.Successful(result
-            , _successResult
+            , Results.SuccessResult
             , Values.IntPassedToFunction
             , null);
     }
@@ -265,7 +197,7 @@ public class Tap_Success
         var func = Functions.GetExceptionAction();
 
         //Act
-        var result = _successResult.Tap(func);
+        var result = Results.SuccessResult.Tap(func);
 
         // Assert
         Assertions.ExceptionThrown(result);
@@ -278,7 +210,7 @@ public class Tap_Success
         var func = Functions.GetExceptionAction();
 
         //Act
-        var result = await _asyncSuccessResult.Tap(func);
+        var result = await Results.AsyncSuccessResult.Tap(func);
 
         // Assert
         Assertions.ExceptionThrown(result);
@@ -291,7 +223,7 @@ public class Tap_Success
         var func = Functions.GetExceptionAsyncAction();
 
         //Act
-        var result = await _asyncSuccessResult.Tap(func, CancellationToken.None);
+        var result = await Results.AsyncSuccessResult.Tap(func, CancellationToken.None);
 
         // Assert
         Assertions.ExceptionThrown(result);
@@ -304,7 +236,7 @@ public class Tap_Success
         var func = Functions.GetExceptionAsyncAction();
 
         //Act
-        var result = await _successResult.Tap(func, CancellationToken.None);
+        var result = await Results.SuccessResult.Tap(func, CancellationToken.None);
 
         // Assert
         Assertions.ExceptionThrown(result);
@@ -317,7 +249,7 @@ public class Tap_Success
         var func = Functions.GetNoParamExceptionAction();
 
         //Act
-        var result = _successResult.Tap(func);
+        var result = Results.SuccessResult.Tap(func);
 
         // Assert
         Assertions.ExceptionThrown(result);
@@ -330,7 +262,7 @@ public class Tap_Success
         var func = Functions.GetNoParamExceptionAsyncAction();
 
         //Act
-        var result = await _successResult.Tap(func, CancellationToken.None);
+        var result = await Results.SuccessResult.Tap(func, CancellationToken.None);
 
         // Assert
         Assertions.ExceptionThrown(result);
@@ -343,7 +275,7 @@ public class Tap_Success
         var func = Functions.GetNoParamExceptionAction();
 
         //Act
-        var result = await _asyncSuccessResult.Tap(func);
+        var result = await Results.AsyncSuccessResult.Tap(func);
 
         // Assert
         Assertions.ExceptionThrown(result);
@@ -356,7 +288,7 @@ public class Tap_Success
         var func = Functions.GetNoParamExceptionAsyncAction();
 
         //Act
-        var result = await _asyncSuccessResult.Tap(func, CancellationToken.None);
+        var result = await Results.AsyncSuccessResult.Tap(func, CancellationToken.None);
 
         // Assert
         Assertions.ExceptionThrown(result);

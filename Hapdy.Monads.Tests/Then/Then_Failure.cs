@@ -102,7 +102,7 @@ public class Then_Failure
     public void When_FailureAndSuccessExpectsNoParam_Then_DoesNotRunSuccessFunction()
     {
         // Arrange
-        var func = Functions.GetNoParamFunction();
+        var func = Functions.GetNoParamFunctionToString();
 
         // Act
         var result = Results.FailureResult.Then(func);
@@ -128,7 +128,7 @@ public class Then_Failure
     public async Task When_AsyncFailureAndSuccessExpectsNoParam_Then_DoesNotRunSuccessFunction()
     {
         // Arrange
-        var func = Functions.GetNoParamFunction();
+        var func = Functions.GetNoParamFunctionToString();
 
         // Act
         var result = await Results.AsyncFailureResult.Then(func);

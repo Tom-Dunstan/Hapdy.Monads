@@ -131,7 +131,7 @@ public class Then_Success
     public void When_SuccessFunctionExpectsNoValue_Then_RunsSuccessFunction()
     {
         // Arrange
-        var func = Functions.GetNoParamFunction();
+        var func = Functions.GetNoParamFunctionToString();
 
         // Act
         var result = Results.SuccessResult.Then(func);
@@ -163,7 +163,7 @@ public class Then_Success
     public async Task When_AsyncSuccessFunctionExpectsNoValue_Then_RunsSuccessFunction()
     {
         // Arrange
-        var func = Functions.GetNoParamFunction();
+        var func = Functions.GetNoParamFunctionToString();
 
         // Act
         var result = await Results.AsyncSuccessResult.Then(func);
@@ -195,7 +195,7 @@ public class Then_Success
     public void When_SuccessFunctionThrowsException_Then_ReturnsExceptionFailure()
     {
         // Arrange
-        var func = Functions.GetExceptionFunction();
+        var func = Functions.GetExceptionFunction<int>();
 
         //Act
         var result = Results.SuccessResult.Then(func);
@@ -208,7 +208,7 @@ public class Then_Success
     public async Task When_AsyncSuccessFunctionThrowsException_Then_ReturnsExceptionFailure()
     {
         // Arrange
-        var func = Functions.GetExceptionFunction();
+        var func = Functions.GetExceptionFunction<int>();
 
         //Act
         var result = await Results.AsyncSuccessResult.Then(func);
@@ -221,7 +221,7 @@ public class Then_Success
     public async Task When_SuccessFunctionThrowsException_Then_ReturnsExceptionFailureAsync()
     {
         // Arrange
-        var func = Functions.GetExceptionAsyncFunction();
+        var func = Functions.GetExceptionAsyncFunction<int>();
 
         //Act
         var result = await Results.SuccessResult.Then(func, CancellationToken.None);
@@ -234,7 +234,7 @@ public class Then_Success
     public async Task When_AsyncSuccessFunctionThrowsException_Then_ReturnsExceptionFailureAsync()
     {
         // Arrange
-        var func = Functions.GetExceptionAsyncFunction();
+        var func = Functions.GetExceptionAsyncFunction<int>();
 
         //Act
         var result = await Results.AsyncSuccessResult.Then(func, CancellationToken.None);
@@ -247,7 +247,7 @@ public class Then_Success
     public void When_SuccessFunctionExpectsNoValueThrowsException_Then_ReturnsExceptionFailure()
     {
         // Arrange
-        var func = Functions.GetNoParamExceptionFunction();
+        var func = Functions.GetNoParamExceptionFunction<int>();
 
         //Act
         var result = Results.SuccessResult.Then(func);
@@ -260,7 +260,7 @@ public class Then_Success
     public async Task When_SuccessFunctionExpectsNoValueThrowsException_Then_ReturnsExceptionFailureAsync()
     {
         // Arrange
-        var func = Functions.GetNoParamExceptionAsyncFunction();
+        var func = Functions.GetNoParamExceptionAsyncFunction<int>();
 
         //Act
         var result = await Results.SuccessResult.Then(func, CancellationToken.None);
@@ -273,7 +273,7 @@ public class Then_Success
     public async Task When_AsyncSuccessFunctionExpectsNoValueThrowsException_Then_ReturnsExceptionFailure()
     {
         // Arrange
-        var func = Functions.GetNoParamExceptionFunction();
+        var func = Functions.GetNoParamExceptionFunction<int>();
 
         //Act
         var result = await Results.AsyncSuccessResult.Then(func);
@@ -286,7 +286,7 @@ public class Then_Success
     public async Task When_AsyncSuccessFunctionExpectsNoValueThrowsException_Then_ReturnsExceptionFailureAsync()
     {
         // Arrange
-        var func = Functions.GetNoParamExceptionAsyncFunction();
+        var func = Functions.GetNoParamExceptionAsyncFunction<int>();
 
         //Act
         var result = await Results.AsyncSuccessResult.Then(func, CancellationToken.None);
